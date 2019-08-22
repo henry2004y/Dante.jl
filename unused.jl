@@ -580,6 +580,10 @@ b = sum(state_GV[iMin:iMax,jMin:jMax,kMin:kMax,B_],dims=4)
 
    end
 
+   time_G .= CFL ./ (
+   (nI > 1).*Cmax_XF./CellSize_D[1] .+
+   (nJ > 1).*Cmax_YF./CellSize_D[2] .+
+   (nK > 1).*Cmax_ZF./CellSize_D[3])
 
 # Divergence
 @. px[2:n-1,:,:] = (var[3:n,:,:,1] - var[1:n-2,:,:,1])/(hx[3:n] - hx[1:n-2])
