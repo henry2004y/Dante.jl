@@ -1,0 +1,10 @@
+.DS_STORE
+.gitattributes
+*.out
+*.outs
+*.log
+#.dat
+*.eps
+*.png
+*.avi
+*~
