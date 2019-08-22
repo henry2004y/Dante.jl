@@ -1,0 +1,33 @@
+[Parameters]
+nD = 1			# Dimension of the system
+Scheme     = "Rusanov"
+Order      = 2
+CFL        = 0.9
+limiter    = "MM"
+TimeAccurate = true
+UseConservative = true
+
+IC         = "Riemann"
+RiemannProblemType = 1
+
+nStep      = 100
+tEnd       = 0.1
+
+[Grid]
+TypeGrid   = "Cartesian"
+xyzMinMax  = [[0.0, 1.0]]
+nI = 1000
+nJ = 1
+nK = 1
+BCtype = ["float","float"]
+
+
+[Plots]
+DoPlot = true
+PlotVar = "rho"
+PlotInterval = 10
+
+PlotType = [
+  "x",
+  "1D"
+]
