@@ -48,7 +48,7 @@ struct Param3D <: Param
    kMinAll::Int
    kMaxAll::Int
    CFL::Float64
-   nT::Int             # Total timesteps
+   nStep::Int             # Total timesteps
    tEnd::Float64
    TypeBc::Array{String,1} # Type of boundary conditions
    IC::String
@@ -68,13 +68,13 @@ struct Param3D <: Param
 
    function Param3D(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,
       UseConservative,iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,
-      jMaxAll,kMinAll,kMaxAll,CFL,nT,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,
+      jMaxAll,kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,
       PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
       @assert(0 ≤ tEnd, "Simulation time must be positive!")
 
       new(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,UseConservative,
          iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,jMaxAll,
-         kMinAll,kMaxAll,CFL,nT,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,PlotVar,
+         kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,PlotVar,
          x,y,z,FullSize,GridSize,CellSize_D)
    end
 end
@@ -107,7 +107,7 @@ function setParameters()
    CFL = paramIn["Parameters"]["CFL"]::Float64
    TimeAccurate = paramIn["Parameters"]["TimeAccurate"]::Bool
    UseConservative = paramIn["Parameters"]["UseConservative"]::Bool
-   nT  = paramIn["Parameters"]["nStep"]::Int64
+   nStep  = paramIn["Parameters"]["nStep"]::Int64
    tEnd = paramIn["Parameters"]["tEnd"]::Float64
    DoPlot = paramIn["Plots"]["DoPlot"]::Bool
    PlotInterval = paramIn["Plots"]["PlotInterval"]::Int64
@@ -173,7 +173,7 @@ function setParameters()
 
    param = Param3D(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,
       UseConservative,iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,
-      jMaxAll,kMinAll,kMaxAll,CFL,nT,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,
+      jMaxAll,kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,
       PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
 end
 
