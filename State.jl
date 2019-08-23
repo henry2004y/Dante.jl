@@ -21,7 +21,7 @@ function set_init(param::Param)
    B        = @view state_GV[:,:,:,B_]
    pressure = @view state_GV[:,:,:,P_]
 
-   nI = param.nI
+   nI,nJ,nK,nG = param.nI, param.nJ, param.nK, param.nG
 
    if param.IC == "contact discontinuity"
       density[1:floor(Int,nI/2),:,:] .= 2.0
@@ -134,14 +134,14 @@ function set_init(param::Param)
 
       # Initial Condition for our 1D domain
       # Density
-      density[1:floor(Int,nI/2),:,:] .= rho[1] # region 1
-      density[floor(Int,nI/2+1):end,:,:] .= rho[2] # region 2
+      density[1:floor(Int,nI/2)+nG,:,:] .= rho[1] # region 1
+      density[floor(Int,nI/2+1)+nG:end,:,:] .= rho[2] # region 2
       # Velocity in x
-      velocity[1:floor(Int,nI/2),:,:,1] .= u[1] # region 1
-      velocity[floor(Int,nI/2+1):end,:,:,1] .= u[2] # region 2
+      velocity[1:floor(Int,nI/2)+nG,:,:,1] .= u[1] # region 1
+      velocity[floor(Int,nI/2+1)+nG:end,:,:,1] .= u[2] # region 2
       # Pressure
-      pressure[1:floor(Int,nI/2),:,:] .= p[1] # region 1
-      pressure[floor(Int,nI/2+1):end,:,:] .= p[2] # region 2
+      pressure[1:floor(Int,nI/2)+nG,:,:] .= p[1] # region 1
+      pressure[floor(Int,nI/2+1)+nG:end,:,:] .= p[2] # region 2
 
    else
       error("unknown initial condition type!")
