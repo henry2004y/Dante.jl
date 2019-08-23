@@ -119,7 +119,7 @@ function main()
       end
    else # Advance with steps
       for iStep = 1:param.nStep
-         if param.Order == 1 # 1st order method
+         if param.Order == 1
             # Set boundary conditions
             set_cell_boundary!(param, state_GV)
 
@@ -145,7 +145,7 @@ function main()
             end
 
             @printf("it=%d\n", it)
-         elseif param.Order == 2 # 2nd order method
+         elseif param.Order == 2
             # 1st stage of modified timestepping
 
             # Set boundary conditions
