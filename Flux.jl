@@ -77,7 +77,7 @@ function calc_face_flux!(param::Param, faceValue::FaceState,
 
    get_physical_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
-   add_numerical_flux!(param, faceValue, faceFlux, speedFlux) # takes time
+   add_numerical_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR) # takes time
 
    return
 end
@@ -342,7 +342,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
 end
 
 function add_numerical_flux!(param::Param, faceValue::FaceState,
-   faceFlux::FaceFlux, speedFlux::SpeedFlux)
+   faceFlux::FaceFlux, speedFlux::SpeedFlux, faceFluxLR::FaceFluxLR)
 
    nI,nJ,nK = param.nI, param.nJ, param.nK
    nVar = param.nVar
@@ -446,71 +446,78 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
 
       end
    elseif param.Scheme == "HLLE"
-      smax_XF,smax_YF,smax_ZF,smin_XF,smin_YF,smin_ZF = get_speed_maxmin(param, faceValue)
+      Cmin_XF = speedFlux.Cmin_XF
+      Cmin_YF = speedFlux.Cmin_YF
+      Cmin_ZF = speedFlux.Cmin_ZF
 
-      if ~Parameters.UseConservative
+      LFlux_XV = faceFluxLR.LFlux_XV
+      RFlux_XV = faceFluxLR.RFlux_XV
+      LFlux_YV = faceFluxLR.LFlux_YV
+      RFlux_YV = faceFluxLR.RFlux_YV
+      LFlux_ZV = faceFluxLR.LFlux_ZV
+      RFlux_ZV = faceFluxLR.RFlux_ZV
+
+      get_speed_maxmin!(param, faceValue, speedFlux)
+
+      if ~param.UseConservative
 
          @. Flux_XV = Flux_XV -
-            0.5*(smax_XF + smin_XF)/(smax_XF - smin_XF)*(RFlux_XV - LFlux_XV) +
-            smax_XF*smin_XF/(smax_XF - smin_XF)* (RState_XV - LState_XV)
+            0.5*(Cmax_XF + Cmin_XF)/(Cmax_XF - Cmin_XF)*(RFlux_XV - LFlux_XV) +
+            Cmax_XF*Cmin_XF/(Cmax_XF - Cmin_XF)* (RState_XV - LState_XV)
          @. Flux_YV = Flux_YV -
-            0.5*(smax_YF + smin_YF)/(smax_YF - smin_YF)*(RFlux_YV - LFlux_YV) +
-            smax_YF*smin_YF/(smax_YF - smin_YF)* (RState_YV - LState_YV)
+            0.5*(Cmax_YF + Cmin_YF)/(Cmax_YF - Cmin_YF)*(RFlux_YV - LFlux_YV) +
+            Cmax_YF*Cmin_YF/(Cmax_YF - Cmin_YF)* (RState_YV - LState_YV)
          @. Flux_ZV = Flux_ZV -
-            0.5*(smax_ZF + smin_ZF)/(smax_ZF - smin_ZF)*(RFlux_ZV - LFlux_ZV) +
-            smax_ZF*smin_ZF/(smax_ZF - smin_ZF)*(RState_ZV - LState_ZV)
+            0.5*(Cmax_ZF + Cmin_ZF)/(Cmax_ZF - Cmin_ZF)*(RFlux_ZV - LFlux_ZV) +
+            Cmax_ZF*Cmin_ZF/(Cmax_ZF - Cmin_ZF)*(RState_ZV - LState_ZV)
       else
          # If I solve energy equation instead of pressure, there's
          # duplicate calculation above, even though the expression
          # looks compact. That's why I use an if-else statement.
 
-         @. Flux_XV[:,:,:,Rho_:Bz_] = Flux_XV[:,:,:,Rho_:Bz_] -
-            0.5*(smax_XF + smin_XF)/(smax_XF - smin_XF)*
-            (RFlux_XV[:,:,:,Rho_:Bz_] - LFlux_XV[:,:,:,Rho_:Bz_]) +
-            smax_XF*smin_XF/(smax_XF - smin_XF)*
-            (RState_XV[:,:,:,Rho_:Bz_] - LState_XV[:,:,:,Rho_:Bz_])
-         @. Flux_XV[:,:,:,E_] = Flux_XV[:,:,:,E_] -
-            0.5*(smax_XF + smin_XF)/(smax_XF - smin_XF)*
-            (RFlux_XV[:,:,:,E_] - LFlux_XV[:,:,:,E_]) +
-            smax_XF.*smin_XF./(smax_XF - smin_XF)* (
-            (RState_XV[:,:,:,P_] / (gamma-1) +
-            0.5/RState_XV[:,:,:,Rho_]*$sum(RState_XV[:,:,:,U_].^2,4) +
-            0.5*$sum(RState_XV[:,:,:,B_].^2,4)) -
-            (LState_XV[:,:,:,P_] / (gamma-1) +
-            0.5/LState_XV[:,:,:,Rho_]*$sum(LState_XV[:,:,:,U_].^2,4) +
-            0.5*sum(LState_XV[:,:,:,B_].^2,4)))
+         @. Flux_XV[:,:,:,Rho_:Bz_] -= 0.5*(Cmax_XF + Cmin_XF)/(Cmax_XF - Cmin_XF)*
+            (RFlux_XV[:,:,:,Rho_:Bz_] - LFlux_XV[:,:,:,Rho_:Bz_]) -
+            Cmax_XF*Cmin_XF/(Cmax_XF - Cmin_XF)*(RState_XV[:,:,:,Rho_:Bz_] - LState_XV[:,:,:,Rho_:Bz_])
 
-         @. Flux_YV[:,:,:,Rho_:Bz_] = Flux_YV[:,:,:,Rho_:Bz_] -
-            0.5*(smax_YF + smin_YF)/(smax_YF - smin_YF)*
-            (RFlux_YV[:,:,:,Rho_:Bz_] - LFlux_YV[:,:,:,Rho_:Bz_])+
-            smax_YF*smin_YF/(smax_YF - smin_YF)*
+         @. Flux_XV[:,:,:,E_] -= 0.5*(Cmax_XF + Cmin_XF)/(Cmax_XF - Cmin_XF)*
+            (RFlux_XV[:,:,:,E_] - LFlux_XV[:,:,:,E_]) -
+            Cmax_XF*Cmin_XF/(Cmax_XF - Cmin_XF)* (
+            (RState_XV[:,:,:,P_] / (γ-1) +
+            0.5/RState_XV[:,:,:,Rho_]*$dropdims($sum(RState_XV[:,:,:,U_].^2,dims=4);dims=4) +
+            0.5*$dropdims($sum(RState_XV[:,:,:,B_].^2,dims=4);dims=4)) -
+            (LState_XV[:,:,:,P_] / (γ-1) +
+            0.5/LState_XV[:,:,:,Rho_]*$dropdims($sum(LState_XV[:,:,:,U_].^2,dims=4);dims=4) +
+            0.5*$dropdims($sum(LState_XV[:,:,:,B_].^2,dims=4);dims=4)))
+
+         @. Flux_YV[:,:,:,Rho_:Bz_] -= 0.5*(Cmax_YF + Cmin_YF)/(Cmax_YF - Cmin_YF)*
+            (RFlux_YV[:,:,:,Rho_:Bz_] - LFlux_YV[:,:,:,Rho_:Bz_]) -
+            Cmax_YF*Cmin_YF/(Cmax_YF - Cmin_YF)*
             (RState_YV[:,:,:,Rho_:Bz_] - LState_YV[:,:,:,Rho_:Bz_])
          @. Flux_YV[:,:,:,E_] = Flux_YV[:,:,:,E_] -
-            0.5*(smax_YF + smin_YF)/(smax_YF - smin_YF)*
-            (RFlux_YV[:,:,:,E_] - LFlux_YV[:,:,:,E_]) +
-            smax_YF.*smin_YF/(smax_YF - smin_YF)* (
-            (RState_YV[:,:,:,P_] / (gamma-1) +
-            0.5/RState_YV[:,:,:,Rho_]*$sum(RState_YV[:,:,:,U_].^2,4) +
-            0.5*$sum(RState_YV[:,:,:,B_].^2,4)) -
-            (LState_YV[:,:,:,P_] / (gamma-1) +
-            0.5/LState_YV[:,:,:,Rho_]*$sum(LState_YV[:,:,:,U_].^2,4) +
-            0.5*$sum(LState_YV[:,:,:,B_].^2,4)))
+            0.5*(Cmax_YF + Cmin_YF)/(Cmax_YF - Cmin_YF)*
+            (RFlux_YV[:,:,:,E_] - LFlux_YV[:,:,:,E_]) -
+            Cmax_YF*Cmin_YF/(Cmax_YF - Cmin_YF)* (
+            (RState_YV[:,:,:,P_] / (γ-1) +
+            0.5/RState_YV[:,:,:,Rho_]*$dropdims($sum(RState_YV[:,:,:,U_].^2,dims=4);dims=4) +
+            0.5*$dropdims($sum(RState_YV[:,:,:,B_].^2,dims=4);dims=4)) -
+            (LState_YV[:,:,:,P_] / (γ-1) +
+            0.5/LState_YV[:,:,:,Rho_]*$dropdims($sum(LState_YV[:,:,:,U_].^2,dims=4);dims=4) +
+            0.5*$dropdims($sum(LState_YV[:,:,:,B_].^2,dims=4);dims=4)))
 
-         @. Flux_ZV[:,:,:,Rho_:Bz_] = Flux_ZV[:,:,:,Rho_:Bz_] -
-            0.5*(smax_ZF + smin_ZF)/(smax_ZF - smin_ZF)*
-            (RFlux_ZV[:,:,:,Rho_:Bz_] - LFlux_ZV[:,:,:,Rho_:Bz_]) +
-            smax_ZF*smin_ZF/(smax_ZF - smin_ZF)*
+         @. Flux_ZV[:,:,:,Rho_:Bz_] -= 0.5*(Cmax_ZF + Cmin_ZF)/(Cmax_ZF - Cmin_ZF)*
+            (RFlux_ZV[:,:,:,Rho_:Bz_] - LFlux_ZV[:,:,:,Rho_:Bz_]) -
+            Cmax_ZF*Cmin_ZF/(Cmax_ZF - Cmin_ZF)*
             (RState_ZV[:,:,:,Rho_:Bz_] - LState_ZV[:,:,:,Rho_:Bz_])
          @. Flux_ZV[:,:,:,E_] = Flux_ZV[:,:,:,E_] -
-            0.5*(smax_ZF + smin_ZF)/(smax_ZF - smin_ZF)*
-            (RFlux_ZV[:,:,:,E_] - LFlux_ZV[:,:,:,E_]) +
-            smax_ZF.*smin_ZF/(smax_ZF - smin_ZF)* (
-            (RState_ZV[:,:,:,P_] / (gamma-1) +
-            0.5/RState_ZV[:,:,:,Rho_]*$sum(RState_ZV[:,:,:,U_].^2,4) +
-            0.5*$sum(RState_ZV[:,:,:,B_].^2,4)) -
-            (LState_ZV[:,:,:,P_] / (gamma-1) +
-            0.5/LState_ZV[:,:,:,Rho_]*$sum(LState_ZV[:,:,:,U_].^2,4) +
-            0.5*$sum(LState_ZV[:,:,:,B_].^2,4)))
+            0.5*(Cmax_ZF + Cmin_ZF)/(Cmax_ZF - Cmin_ZF)*
+            (RFlux_ZV[:,:,:,E_] - LFlux_ZV[:,:,:,E_]) -
+            Cmax_ZF*Cmin_ZF/(Cmax_ZF - Cmin_ZF)* (
+            (RState_ZV[:,:,:,P_] / (γ-1) +
+            0.5/RState_ZV[:,:,:,Rho_]*$dropdims($sum(RState_ZV[:,:,:,U_].^2,dims=4);dims=4) +
+            0.5*$dropdims($sum(RState_ZV[:,:,:,B_].^2,dims=4);dims=4)) -
+            (LState_ZV[:,:,:,P_] / (γ-1) +
+            0.5/LState_ZV[:,:,:,Rho_]*$dropdims($sum(LState_ZV[:,:,:,U_].^2,dims=4);dims=4) +
+            0.5*$dropdims($sum(LState_ZV[:,:,:,B_].^2,dims=4);dims=4)))
       end
 
    end
@@ -572,7 +579,8 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
 
 end
 
-function get_speed_maxmin(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
+function get_speed_maxmin!(param::Param, faceValue::FaceState,
+   speedFlux::SpeedFluxMinMax)
    nI, nJ, nK = param.nI, param.nJ, param.nK
    # Aliases
    LS_XV, RS_XV = faceValue.LState_XV, faceValue.RState_XV
@@ -628,7 +636,7 @@ function get_speed_maxmin(param::Param,faceValue::FaceState,speedFlux::SpeedFlux
          sqrt((Cs2_RYF + Ca2_RYF)^2 - 4.0*Cs2_RYF*Can2_RYF)) )
 
       Cmax_YF[i,j,k] = max(0, u_LYF+c_LYF, u_RYF+c_RYF)
-      Cmin_YF[i,j,k] = min(0, u_LYF-c_LYF, u_RYF-c_RF)
+      Cmin_YF[i,j,k] = min(0, u_LYF-c_LYF, u_RYF-c_RYF)
    end
 
    for k = 1:nK+1, j = 1:nJ, i = 1:nI
