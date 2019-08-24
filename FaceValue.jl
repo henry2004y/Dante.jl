@@ -4,27 +4,55 @@ export calc_face_value, FaceState
 
 using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
 
-struct FaceState
-   LState_XV::Array{Float64,4}
-   RState_XV::Array{Float64,4}
-   LState_YV::Array{Float64,4}
-   RState_YV::Array{Float64,4}
-   LState_ZV::Array{Float64,4}
-   RState_ZV::Array{Float64,4}
+abstract type FaceState end
+
+struct FaceStateCopy{T<:AbstractFloat} <: FaceState
+   LState_XV::Array{T,4}
+   RState_XV::Array{T,4}
+   LState_YV::Array{T,4}
+   RState_YV::Array{T,4}
+   LState_ZV::Array{T,4}
+   RState_ZV::Array{T,4}
 end
 
+struct FaceStateView <: FaceState
+   LState_XV::SubArray{Float64,4,Array{Float64,4},
+      Tuple{UnitRange{Int64},UnitRange{Int64},UnitRange{Int64},
+      Base.Slice{Base.OneTo{Int64}}},false}
+   RState_XV::SubArray{Float64,4,Array{Float64,4},
+      Tuple{UnitRange{Int64},UnitRange{Int64},UnitRange{Int64},
+      Base.Slice{Base.OneTo{Int64}}},false}
+   LState_YV::SubArray{Float64,4,Array{Float64,4},
+      Tuple{UnitRange{Int64},UnitRange{Int64},UnitRange{Int64},
+      Base.Slice{Base.OneTo{Int64}}},false}
+   RState_YV::SubArray{Float64,4,Array{Float64,4},
+      Tuple{UnitRange{Int64},UnitRange{Int64},UnitRange{Int64},
+      Base.Slice{Base.OneTo{Int64}}},false}
+   LState_ZV::SubArray{Float64,4,Array{Float64,4},
+      Tuple{UnitRange{Int64},UnitRange{Int64},UnitRange{Int64},
+      Base.Slice{Base.OneTo{Int64}}},false}
+   RState_ZV::SubArray{Float64,4,Array{Float64,4},
+      Tuple{UnitRange{Int64},UnitRange{Int64},UnitRange{Int64},
+      Base.Slice{Base.OneTo{Int64}}},false}
+end
+
+"""
+Type instability for the return type is introduced, but it seems ok.
+"""
 function calc_face_value(param::Param, state_GV::Array{Float64,4})
 
    iMin, iMax, jMin, jMax, kMin, kMax =
    param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
 
    if param.Order == 1
-      LState_XV = state_GV[iMin-1:iMax,jMin:jMax,kMin:kMax,:]
-      RState_XV = state_GV[iMin:iMax+1,jMin:jMax,kMin:kMax,:]
-      LState_YV = state_GV[iMin:iMax,jMin-1:jMax,kMin:kMax,:]
-      RState_YV = state_GV[iMin:iMax,jMin:jMax+1,kMin:kMax,:]
-      LState_ZV = state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax,:]
-      RState_ZV = state_GV[iMin:iMax,jMin:jMax,kMin:kMax+1,:]
+      LState_XV = @view state_GV[iMin-1:iMax,jMin:jMax,kMin:kMax,:]
+      RState_XV = @view state_GV[iMin:iMax+1,jMin:jMax,kMin:kMax,:]
+      LState_YV = @view state_GV[iMin:iMax,jMin-1:jMax,kMin:kMax,:]
+      RState_YV = @view state_GV[iMin:iMax,jMin:jMax+1,kMin:kMax,:]
+      LState_ZV = @view state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax,:]
+      RState_ZV = @view state_GV[iMin:iMax,jMin:jMax,kMin:kMax+1,:]
+
+      faceValue = FaceStateView(LState_XV,RState_XV,LState_YV,RState_YV,LState_ZV,RState_ZV)
    elseif param.Order == 2
       # Compute and limit slopes
 
@@ -92,22 +120,21 @@ function calc_face_value(param::Param, state_GV::Array{Float64,4})
       end
 
       # Linear interpolation onto edge centers
-      LState_XV = state_GV[iMin-1:iMax,jMin:jMax,kMin:kMax,:] .+
+      @views LState_XV = state_GV[iMin-1:iMax,jMin:jMax,kMin:kMax,:] .+
          0.5*dq_X[1:end-1,:,:,:]
-      RState_XV = state_GV[iMin:iMax+1,jMin:jMax,kMin:kMax,:] .-
+      @views RState_XV = state_GV[iMin:iMax+1,jMin:jMax,kMin:kMax,:] .-
          0.5*dq_X[2:end  ,:,:,:]
-      LState_YV = state_GV[iMin:iMax,jMin-1:jMax,kMin:kMax,:] .+
+      @views LState_YV = state_GV[iMin:iMax,jMin-1:jMax,kMin:kMax,:] .+
          0.5*dq_Y[:,1:end-1,:,:]
-      RState_YV = state_GV[iMin:iMax,jMin:jMax+1,kMin:kMax,:] .-
+      @views RState_YV = state_GV[iMin:iMax,jMin:jMax+1,kMin:kMax,:] .-
          0.5*dq_Y[:,2:end  ,:,:]
-      LState_ZV = state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax,:] .+
+      @views LState_ZV = state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax,:] .+
          0.5*dq_Z[:,:,1:end-1,:]
-      RState_ZV = state_GV[iMin:iMax,jMin:jMax,kMin:kMax+1,:] .-
+      @views RState_ZV = state_GV[iMin:iMax,jMin:jMax,kMin:kMax+1,:] .-
          0.5*dq_Z[:,:,2:end  ,:]
-
+      faceValue = FaceStateCopy(LState_XV,RState_XV,LState_YV,RState_YV,LState_ZV,RState_ZV)
    end
 
-   faceValue = FaceState(LState_XV,RState_XV,LState_YV,RState_YV,LState_ZV,RState_ZV)
 
    return faceValue
 end
