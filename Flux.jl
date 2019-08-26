@@ -460,64 +460,117 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
       get_speed_maxmin!(param, faceValue, speedFlux)
 
       if ~param.UseConservative
+         @inbounds for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
+            Flux_XV[i,j,k,iVar] -= 0.5*(Cmax_XF[i,j,k] + Cmin_XF[i,j,k])/
+               (Cmax_XF[i,j,k] - Cmin_XF[i,j,k])*
+               (RFlux_XV[i,j,k,iVar] - LFlux_XV[i,j,k,iVar]) -
+               Cmax_XF[i,j,k]*Cmin_XF[i,j,k]/(Cmax_XF[i,j,k] - Cmin_XF[i,j,k])*
+               (RState_XV[i,j,k,iVar] - LState_XV[i,j,k,iVar])
+         end
 
-         @. Flux_XV = Flux_XV -
-            0.5*(Cmax_XF + Cmin_XF)/(Cmax_XF - Cmin_XF)*(RFlux_XV - LFlux_XV) +
-            Cmax_XF*Cmin_XF/(Cmax_XF - Cmin_XF)* (RState_XV - LState_XV)
-         @. Flux_YV = Flux_YV -
-            0.5*(Cmax_YF + Cmin_YF)/(Cmax_YF - Cmin_YF)*(RFlux_YV - LFlux_YV) +
-            Cmax_YF*Cmin_YF/(Cmax_YF - Cmin_YF)* (RState_YV - LState_YV)
-         @. Flux_ZV = Flux_ZV -
-            0.5*(Cmax_ZF + Cmin_ZF)/(Cmax_ZF - Cmin_ZF)*(RFlux_ZV - LFlux_ZV) +
-            Cmax_ZF*Cmin_ZF/(Cmax_ZF - Cmin_ZF)*(RState_ZV - LState_ZV)
+         @inbounds for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
+            Flux_YV[i,j,k,iVar] -= 0.5*(Cmax_YF[i,j,k] + Cmin_YF[i,j,k])/
+               (Cmax_YF[i,j,k] - Cmin_YF[i,j,k])*
+               (RFlux_YV[i,j,k,iVar] - LFlux_YV[i,j,k,iVar]) -
+               Cmax_YF[i,j,k]*Cmin_YF[i,j,k]/(Cmax_YF[i,j,k] - Cmin_YF[i,j,k])*
+               (RState_YV[i,j,k,iVar] - LState_YV[i,j,k,iVar])
+         end
+
+         @inbounds for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
+            Flux_ZV[i,j,k,iVar] -= 0.5*(Cmax_ZF[i,j,k] + Cmin_ZF[i,j,k])/
+               (Cmax_ZF[i,j,k] - Cmin_ZF[i,j,k])*
+               (RFlux_ZV[i,j,k,iVar] - LFlux_ZV[i,j,k,iVar]) -
+               Cmax_ZF[i,j,k]*Cmin_ZF[i,j,k]/(Cmax_ZF[i,j,k] - Cmin_ZF[i,j,k])*
+               (RState_ZV[i,j,k,iVar] - LState_ZV[i,j,k,iVar])
+         end
       else
          # If I solve energy equation instead of pressure, there's
          # duplicate calculation above, even though the expression
          # looks compact. That's why I use an if-else statement.
 
-         @. Flux_XV[:,:,:,Rho_:Bz_] -= 0.5*(Cmax_XF + Cmin_XF)/(Cmax_XF - Cmin_XF)*
-            (RFlux_XV[:,:,:,Rho_:Bz_] - LFlux_XV[:,:,:,Rho_:Bz_]) -
-            Cmax_XF*Cmin_XF/(Cmax_XF - Cmin_XF)*(RState_XV[:,:,:,Rho_:Bz_] - LState_XV[:,:,:,Rho_:Bz_])
+         @inbounds for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ, i = 1:nI+1
+            Flux_XV[i,j,k,iVar] -= 0.5*(Cmax_XF[i,j,k] + Cmin_XF[i,j,k])/
+               (Cmax_XF[i,j,k] - Cmin_XF[i,j,k])*
+               (RFlux_XV[i,j,k,iVar] - LFlux_XV[i,j,k,iVar]) -
+               Cmax_XF[i,j,k]*Cmin_XF[i,j,k]/(Cmax_XF[i,j,k] - Cmin_XF[i,j,k])*
+               (RState_XV[i,j,k,iVar] - LState_XV[i,j,k,iVar])
+         end
 
-         @. Flux_XV[:,:,:,E_] -= 0.5*(Cmax_XF + Cmin_XF)/(Cmax_XF - Cmin_XF)*
-            (RFlux_XV[:,:,:,E_] - LFlux_XV[:,:,:,E_]) -
-            Cmax_XF*Cmin_XF/(Cmax_XF - Cmin_XF)* (
-            (RState_XV[:,:,:,P_] / (γ-1) +
-            0.5/RState_XV[:,:,:,Rho_]*$dropdims($sum(RState_XV[:,:,:,U_].^2,dims=4);dims=4) +
-            0.5*$dropdims($sum(RState_XV[:,:,:,B_].^2,dims=4);dims=4)) -
-            (LState_XV[:,:,:,P_] / (γ-1) +
-            0.5/LState_XV[:,:,:,Rho_]*$dropdims($sum(LState_XV[:,:,:,U_].^2,dims=4);dims=4) +
-            0.5*$dropdims($sum(LState_XV[:,:,:,B_].^2,dims=4);dims=4)))
+         @inbounds for k = 1:nK, j = 1:nJ, i = 1:nI+1
+            uL = LState_XV[i,j,k,Ux_]^2 + LState_XV[i,j,k,Uy_]^2 +
+               LState_XV[i,j,k,Uz_]^2
+            uR = RState_XV[i,j,k,Ux_]^2 + RState_XV[i,j,k,Uy_]^2 +
+               RState_XV[i,j,k,Uz_]^2
+            bL = LState_XV[i,j,k,Bx_]^2 + LState_XV[i,j,k,By_]^2 +
+               LState_XV[i,j,k,Bz_]^2
+            bR = RState_XV[i,j,k,Bx_]^2 + RState_XV[i,j,k,By_]^2 +
+               RState_XV[i,j,k,Bz_]^2
 
-         @. Flux_YV[:,:,:,Rho_:Bz_] -= 0.5*(Cmax_YF + Cmin_YF)/(Cmax_YF - Cmin_YF)*
-            (RFlux_YV[:,:,:,Rho_:Bz_] - LFlux_YV[:,:,:,Rho_:Bz_]) -
-            Cmax_YF*Cmin_YF/(Cmax_YF - Cmin_YF)*
-            (RState_YV[:,:,:,Rho_:Bz_] - LState_YV[:,:,:,Rho_:Bz_])
-         @. Flux_YV[:,:,:,E_] = Flux_YV[:,:,:,E_] -
-            0.5*(Cmax_YF + Cmin_YF)/(Cmax_YF - Cmin_YF)*
-            (RFlux_YV[:,:,:,E_] - LFlux_YV[:,:,:,E_]) -
-            Cmax_YF*Cmin_YF/(Cmax_YF - Cmin_YF)* (
-            (RState_YV[:,:,:,P_] / (γ-1) +
-            0.5/RState_YV[:,:,:,Rho_]*$dropdims($sum(RState_YV[:,:,:,U_].^2,dims=4);dims=4) +
-            0.5*$dropdims($sum(RState_YV[:,:,:,B_].^2,dims=4);dims=4)) -
-            (LState_YV[:,:,:,P_] / (γ-1) +
-            0.5/LState_YV[:,:,:,Rho_]*$dropdims($sum(LState_YV[:,:,:,U_].^2,dims=4);dims=4) +
-            0.5*$dropdims($sum(LState_YV[:,:,:,B_].^2,dims=4);dims=4)))
+            Flux_XV[i,j,k,E_] -= 0.5*(Cmax_XF[i,j,k] + Cmin_XF[i,j,k])/
+               (Cmax_XF[i,j,k] - Cmin_XF[i,j,k])*
+               (RFlux_XV[i,j,k,E_] - LFlux_XV[i,j,k,E_]) -
+               Cmax_XF[i,j,k]*Cmin_XF[i,j,k]/(Cmax_XF[i,j,k] - Cmin_XF[i,j,k])*(
+               (RState_XV[i,j,k,P_] / (γ-1) +
+               0.5/RState_XV[i,j,k,Rho_]*uR + 0.5*bR) -
+               (LState_XV[i,j,k,P_] / (γ-1) +
+               0.5/LState_XV[:,:,:,Rho_]*uL + 0.5*bL) )
+         end
 
-         @. Flux_ZV[:,:,:,Rho_:Bz_] -= 0.5*(Cmax_ZF + Cmin_ZF)/(Cmax_ZF - Cmin_ZF)*
-            (RFlux_ZV[:,:,:,Rho_:Bz_] - LFlux_ZV[:,:,:,Rho_:Bz_]) -
-            Cmax_ZF*Cmin_ZF/(Cmax_ZF - Cmin_ZF)*
-            (RState_ZV[:,:,:,Rho_:Bz_] - LState_ZV[:,:,:,Rho_:Bz_])
-         @. Flux_ZV[:,:,:,E_] = Flux_ZV[:,:,:,E_] -
-            0.5*(Cmax_ZF + Cmin_ZF)/(Cmax_ZF - Cmin_ZF)*
-            (RFlux_ZV[:,:,:,E_] - LFlux_ZV[:,:,:,E_]) -
-            Cmax_ZF*Cmin_ZF/(Cmax_ZF - Cmin_ZF)* (
-            (RState_ZV[:,:,:,P_] / (γ-1) +
-            0.5/RState_ZV[:,:,:,Rho_]*$dropdims($sum(RState_ZV[:,:,:,U_].^2,dims=4);dims=4) +
-            0.5*$dropdims($sum(RState_ZV[:,:,:,B_].^2,dims=4);dims=4)) -
-            (LState_ZV[:,:,:,P_] / (γ-1) +
-            0.5/LState_ZV[:,:,:,Rho_]*$dropdims($sum(LState_ZV[:,:,:,U_].^2,dims=4);dims=4) +
-            0.5*$dropdims($sum(LState_ZV[:,:,:,B_].^2,dims=4);dims=4)))
+         @inbounds for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ+1, i = 1:nI
+            Flux_YV[i,j,k,iVar] -= 0.5*(Cmax_YF[i,j,k] + Cmin_YF[i,j,k])/
+               (Cmax_YF[i,j,k] - Cmin_YF[i,j,k])*
+               (RFlux_YV[i,j,k,iVar] - LFlux_YV[i,j,k,iVar]) -
+               Cmax_YF[i,j,k]*Cmin_YF[i,j,k]/(Cmax_YF[i,j,k] - Cmin_YF[i,j,k])*
+               (RState_YV[i,j,k,iVar] - LState_YV[i,j,k,iVar])
+         end
+
+         @inbounds for k = 1:nK, j = 1:nJ+1, i = 1:nI
+            uL = LState_YV[i,j,k,Ux_]^2 + LState_YV[i,j,k,Uy_]^2 +
+               LState_YV[i,j,k,Uz_]^2
+            uR = RState_YV[i,j,k,Ux_]^2 + RState_YV[i,j,k,Uy_]^2 +
+               RState_YV[i,j,k,Uz_]^2
+            bL = LState_YV[i,j,k,Bx_]^2 + LState_YV[i,j,k,By_]^2 +
+               LState_YV[i,j,k,Bz_]^2
+            bR = RState_YV[i,j,k,Bx_]^2 + RState_YV[i,j,k,By_]^2 +
+               RState_YV[i,j,k,Bz_]^2
+
+            Flux_YV[i,j,k,E_] -= 0.5*(Cmax_YF[i,j,k] + Cmin_YF[i,j,k])/
+               (Cmax_YF[i,j,k] - Cmin_YF[i,j,k])*
+               (RFlux_YV[i,j,k,E_] - LFlux_YV[i,j,k,E_]) -
+               Cmax_YF[i,j,k]*Cmin_YF[i,j,k]/(Cmax_YF[i,j,k] - Cmin_YF[i,j,k])*(
+               (RState_YV[i,j,k,P_] / (γ-1) +
+               0.5/RState_YV[i,j,k,Rho_]*uR + 0.5*bR) -
+               (LState_YV[i,j,k,P_] / (γ-1) +
+               0.5/LState_YV[i,j,k,Rho_]*uL + 0.5*bL) )
+         end
+
+         @inbounds for iVar = Rho_:Bz_, k = 1:nK+1, j = 1:nJ, i = 1:nI
+            Flux_ZV[i,j,k,iVar] -= 0.5*(Cmax_ZF[i,j,k] + Cmin_ZF[i,j,k])/
+               (Cmax_ZF[i,j,k] - Cmin_ZF[i,j,k])*
+               (RFlux_ZV[i,j,k,iVar] - LFlux_ZV[i,j,k,iVar]) -
+               Cmax_ZF[i,j,k]*Cmin_ZF[i,j,k]/(Cmax_ZF[i,j,k] - Cmin_ZF[i,j,k])*
+               (RState_ZV[i,j,k,iVar] - LState_ZV[i,j,k,iVar])
+         end
+
+         @inbounds for k = 1:nK+1, j = 1:nJ, i = 1:nI
+            uL = LState_ZV[i,j,k,Ux_]^2 + LState_ZV[i,j,k,Uy_]^2 +
+               LState_ZV[i,j,k,Uz_]^2
+            uR = RState_ZV[i,j,k,Ux_]^2 + RState_ZV[i,j,k,Uy_]^2 +
+               RState_ZV[i,j,k,Uz_]^2
+            bL = LState_ZV[i,j,k,Bx_]^2 + LState_ZV[i,j,k,By_]^2 +
+               LState_ZV[i,j,k,Bz_]^2
+            bR = RState_ZV[i,j,k,Bx_]^2 + RState_ZV[i,j,k,By_]^2 +
+               RState_ZV[i,j,k,Bz_]^2
+
+            Flux_ZV[i,j,k,E_] -= 0.5*(Cmax_ZF[i,j,k] + Cmin_ZF[i,j,k])/
+               (Cmax_ZF[i,j,k] - Cmin_ZF[i,j,k])*
+               (RFlux_ZV[i,j,k,E_] - LFlux_ZV[i,j,k,E_]) -
+               Cmax_ZF[i,j,k]*Cmin_ZF[i,j,k]/(Cmax_ZF[i,j,k] - Cmin_ZF[i,j,k])*(
+               (RState_ZV[i,j,k,P_] / (γ-1) +
+               0.5/RState_ZV[i,j,k,Rho_]*uR + 0.5*bR) -
+               (LState_ZV[i,j,k,P_] / (γ-1) +
+               0.5/LState_ZV[i,j,k,Rho_]*uL + 0.5*bL))
+         end
       end
 
    end
