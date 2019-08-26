@@ -21,7 +21,11 @@ function main()
 
    state_GV = set_init(param)
 
+   faceState, faceGradient = init_face_value(param)
+
    faceFluxLR, faceFlux, speedFlux = init_flux(param)
+
+   source_GV = init_source(param)
 
    time_G = init_timestep(param)
 
@@ -36,13 +40,13 @@ function main()
             set_cell_boundary!(param, state_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state_GV)
+            faceValue = calc_face_value(param, state_GV,faceState,faceGradient)
 
             # Calculate face flux
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            source_GV = calc_source(param, state_GV)
+            calc_source!(param, state_GV, source_GV)
 
             # Calculate time step
             dt = calc_timestep!(param, speedFlux, time_G)
@@ -69,13 +73,13 @@ function main()
             set_cell_boundary!(param, state_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state_GV)
+            faceValue = calc_face_value(param, state_GV,faceState,faceGradient)
 
             # Calculate face flux
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            source_GV = calc_source(param, state_GV)
+            calc_source!(param, state_GV, source_GV)
 
             # Calculate time step
             dt = calc_timestep!(param, speedFlux, time_G)
@@ -91,13 +95,13 @@ function main()
             set_cell_boundary!(param, state1_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state1_GV)
+            faceValue = calc_face_value(param, state1_GV,faceState,faceGradient)
 
             # Calculate face flux
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            source_GV = calc_source(param, state1_GV)
+            calc_source!(param, state1_GV, source_GV)
 
             # Update state
             dt *= 2.0
@@ -124,13 +128,13 @@ function main()
             set_cell_boundary!(param, state_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state_GV)
+            faceValue = calc_face_value(param, state_GV,faceState,faceGradient)
 
             # Calculate face flux
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            source_GV = calc_source(param, state_GV)
+            calc_source!(param, state_GV, source_GV)
 
             # Calculate time step
             calc_timestep!(param, speedFlux, time_G)
@@ -152,13 +156,13 @@ function main()
             set_cell_boundary!(param, state_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state_GV)
+            faceValue = calc_face_value(param, state_GV,faceState,faceGradient)
 
             # Calculate face flux
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            source_GV = calc_source(param, state_GV)
+            calc_source!(param, state_GV, source_GV)
 
             # Calculate time step
             calc_timestep!(param, speedFlux, time_G)
@@ -174,13 +178,13 @@ function main()
             set_cell_boundary!(param, state1_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state1_GV)
+            faceValue = calc_face_value(param, state1_GV,faceState,faceGradient)
 
             # Calculate face flux
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            source_GV = calc_source(param, state1_GV)
+            calc_source!(param, state1_GV, source_GV)
 
             # Update state
             time_G *= 2.0
