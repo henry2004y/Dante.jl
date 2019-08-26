@@ -20,6 +20,86 @@ RState_YV = @view state_GV[iMin:iMax,jMin:jMax+1,kMin:kMax,:]
 LState_ZV = @view state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax,:]
 RState_ZV = @view state_GV[iMin:iMax,jMin:jMax,kMin:kMax+1,:]
 
+# Find dq_j = minmod{fwd diff, bwd diff, cntrl diff}
+@views dqR_X =
+   state_GV[iMin:iMax+2,  jMin:jMax,kMin:kMax,:] .-
+   state_GV[iMin-1:iMax+1,jMin:jMax,kMin:kMax,:]
+@views dqL_X =
+   state_GV[iMin-1:iMax+1,jMin:jMax,kMin:kMax,:] .-
+   state_GV[iMin-2:iMax  ,jMin:jMax,kMin:kMax,:]
+@views dqC_X =
+   state_GV[iMin:iMax+2,  jMin:jMax,kMin:kMax,:] .-
+   state_GV[iMin-2:iMax  ,jMin:jMax,kMin:kMax,:]
+
+dq_X = minmod.(dqR_X,dqL_X,dqC_X)
+
+@views dqR_Y =
+   state_GV[iMin:iMax,jMin:jMax+2,  kMin:kMax,:] .-
+   state_GV[iMin:iMax,jMin-1:jMax+1,kMin:kMax,:]
+@views dqL_Y =
+   state_GV[iMin:iMax,jMin-1:jMax+1,kMin:kMax,:] .-
+   state_GV[iMin:iMax,jMin-2:jMax  ,kMin:kMax,:]
+@views dqC_Y =
+   state_GV[iMin:iMax,jMin:jMax+2  ,kMin:kMax,:] .-
+   state_GV[iMin:iMax,jMin-2:jMax  ,kMin:kMax,:]
+
+dq_Y = minmod.(dqR_Y,dqL_Y,dqC_Y)
+
+@views dqR_Z =
+   state_GV[iMin:iMax,jMin:jMax,kMin:kMax+2,  :] .-
+   state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax+1,:]
+@views dqL_Z =
+   state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax+1,:] .-
+   state_GV[iMin:iMax,jMin:jMax,kMin-2:kMax  ,:]
+@views dqC_Z =
+   state_GV[iMin:iMax,jMin:jMax,kMin:kMax+2,  :] .-
+   state_GV[iMin:iMax,jMin:jMax,kMin-2:kMax,  :]
+
+dq_Z = minmod.(dqR_Z,dqL_Z,dqC_Z)
+
+# Find dq_j = minmod{fwd diff, bwd diff}
+
+@views dqR_X =
+   state_GV[iMin:iMax+2  ,jMin:jMax,kMin:kMax,:] .-
+   state_GV[iMin-1:iMax+1,jMin:jMax,kMin:kMax,:]
+@views dqL_X =
+   state_GV[iMin-1:iMax+1,jMin:jMax,kMin:kMax,:] .-
+   state_GV[iMin-2:iMax  ,jMin:jMax,kMin:kMax,:]
+
+dq_X = minmod.(dqR_X, dqL_X)
+
+@views dqR_Y =
+   state_GV[iMin:iMax,jMin:jMax+2,  kMin:kMax,:] .-
+   state_GV[iMin:iMax,jMin-1:jMax+1,kMin:kMax,:]
+@views dqL_Y =
+   state_GV[iMin:iMax,jMin-1:jMax+1,kMin:kMax,:] .-
+   state_GV[iMin:iMax,jMin-2:jMax  ,kMin:kMax,:]
+
+dq_Y = minmod.(dqR_Y, dqL_Y)
+
+@views dqR_Z =
+   state_GV[iMin:iMax,jMin:jMax,kMin:kMax+2  ,:] .-
+   state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax+1,:]
+@views dqL_Z =
+   state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax+1,:] .-
+   state_GV[iMin:iMax,jMin:jMax,kMin-2:kMax  ,:]
+
+dq_Z = minmod.(dqR_Z, dqL_Z)
+
+# Linear interpolation onto edge centers
+@views LState_XV = state_GV[iMin-1:iMax,jMin:jMax,kMin:kMax,:] .+
+   0.5*dq_X[1:end-1,:,:,:]
+@views RState_XV = state_GV[iMin:iMax+1,jMin:jMax,kMin:kMax,:] .-
+   0.5*dq_X[2:end  ,:,:,:]
+@views LState_YV = state_GV[iMin:iMax,jMin-1:jMax,kMin:kMax,:] .+
+   0.5*dq_Y[:,1:end-1,:,:]
+@views RState_YV = state_GV[iMin:iMax,jMin:jMax+1,kMin:kMax,:] .-
+   0.5*dq_Y[:,2:end  ,:,:]
+@views LState_ZV = state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax,:] .+
+   0.5*dq_Z[:,:,1:end-1,:]
+@views RState_ZV = state_GV[iMin:iMax,jMin:jMax,kMin:kMax+1,:] .-
+   0.5*dq_Z[:,:,2:end  ,:]
+
 
 # face flux
 bL = zeros(nI+1,nJ+1,nK+1)
@@ -338,6 +418,63 @@ smin_ZF = min(sLmin_ZF,sRmin_ZF)
 bL = dropdims(sum(LState_XV[:,:,:,B_].^2,dims=4);dims=4)
 bR = dropdims(sum(RState_XV[:,:,:,B_].^2,dims=4);dims=4)
 
+
+# HLLE
+@. Flux_XV -=
+   0.5*(Cmax_XF + Cmin_XF)/(Cmax_XF - Cmin_XF)*(RFlux_XV - LFlux_XV) -
+   Cmax_XF*Cmin_XF/(Cmax_XF - Cmin_XF)*(RState_XV - LState_XV)
+@. Flux_YV -=
+   0.5*(Cmax_YF + Cmin_YF)/(Cmax_YF - Cmin_YF)*(RFlux_YV - LFlux_YV) -
+   Cmax_YF*Cmin_YF/(Cmax_YF - Cmin_YF)*(RState_YV - LState_YV)
+@. Flux_ZV -=
+   0.5*(Cmax_ZF + Cmin_ZF)/(Cmax_ZF - Cmin_ZF)*(RFlux_ZV - LFlux_ZV) -
+   Cmax_ZF*Cmin_ZF/(Cmax_ZF - Cmin_ZF)*(RState_ZV - LState_ZV)
+
+
+ @. Flux_XV[:,:,:,Rho_:Bz_] -= 0.5*(Cmax_XF + Cmin_XF)/(Cmax_XF - Cmin_XF)*
+ (RFlux_XV[:,:,:,Rho_:Bz_] - LFlux_XV[:,:,:,Rho_:Bz_]) -
+ Cmax_XF*Cmin_XF/(Cmax_XF - Cmin_XF)*(RState_XV[:,:,:,Rho_:Bz_] - LState_XV[:,:,:,Rho_:Bz_])
+
+ @. Flux_XV[:,:,:,E_] -= 0.5*(Cmax_XF + Cmin_XF)/(Cmax_XF - Cmin_XF)*
+ (RFlux_XV[:,:,:,E_] - LFlux_XV[:,:,:,E_]) -
+ Cmax_XF*Cmin_XF/(Cmax_XF - Cmin_XF)* (
+ (RState_XV[:,:,:,P_] / (γ-1) +
+ 0.5/RState_XV[:,:,:,Rho_]*$dropdims($sum(RState_XV[:,:,:,U_].^2,dims=4);dims=4) +
+ 0.5*$dropdims($sum(RState_XV[:,:,:,B_].^2,dims=4);dims=4)) -
+ (LState_XV[:,:,:,P_] / (γ-1) +
+ 0.5/LState_XV[:,:,:,Rho_]*$dropdims($sum(LState_XV[:,:,:,U_].^2,dims=4);dims=4) +
+ 0.5*$dropdims($sum(LState_XV[:,:,:,B_].^2,dims=4);dims=4)))
+
+ @. Flux_YV[:,:,:,Rho_:Bz_] -= 0.5*(Cmax_YF + Cmin_YF)/(Cmax_YF - Cmin_YF)*
+ (RFlux_YV[:,:,:,Rho_:Bz_] - LFlux_YV[:,:,:,Rho_:Bz_]) -
+ Cmax_YF*Cmin_YF/(Cmax_YF - Cmin_YF)*
+ (RState_YV[:,:,:,Rho_:Bz_] - LState_YV[:,:,:,Rho_:Bz_])
+ @. Flux_YV[:,:,:,E_] -=
+ 0.5*(Cmax_YF + Cmin_YF)/(Cmax_YF - Cmin_YF)*
+ (RFlux_YV[:,:,:,E_] - LFlux_YV[:,:,:,E_]) -
+ Cmax_YF*Cmin_YF/(Cmax_YF - Cmin_YF)* (
+ (RState_YV[:,:,:,P_] / (γ-1) +
+ 0.5/RState_YV[:,:,:,Rho_]*$dropdims($sum(RState_YV[:,:,:,U_].^2,dims=4);dims=4) +
+ 0.5*$dropdims($sum(RState_YV[:,:,:,B_].^2,dims=4);dims=4)) -
+ (LState_YV[:,:,:,P_] / (γ-1) +
+ 0.5/LState_YV[:,:,:,Rho_]*$dropdims($sum(LState_YV[:,:,:,U_].^2,dims=4);dims=4) +
+ 0.5*$dropdims($sum(LState_YV[:,:,:,B_].^2,dims=4);dims=4)))
+
+ @. Flux_ZV[:,:,:,Rho_:Bz_] -= 0.5*(Cmax_ZF + Cmin_ZF)/(Cmax_ZF - Cmin_ZF)*
+ (RFlux_ZV[:,:,:,Rho_:Bz_] - LFlux_ZV[:,:,:,Rho_:Bz_]) -
+ Cmax_ZF*Cmin_ZF/(Cmax_ZF - Cmin_ZF)*
+ (RState_ZV[:,:,:,Rho_:Bz_] - LState_ZV[:,:,:,Rho_:Bz_])
+ @. Flux_ZV[:,:,:,E_] -=
+ 0.5*(Cmax_ZF + Cmin_ZF)/(Cmax_ZF - Cmin_ZF)*
+ (RFlux_ZV[:,:,:,E_] - LFlux_ZV[:,:,:,E_]) -
+ Cmax_ZF*Cmin_ZF/(Cmax_ZF - Cmin_ZF)* (
+ (RState_ZV[:,:,:,P_] / (γ-1) +
+ 0.5/RState_ZV[:,:,:,Rho_]*$dropdims($sum(RState_ZV[:,:,:,U_].^2,dims=4);dims=4) +
+ 0.5*$dropdims($sum(RState_ZV[:,:,:,B_].^2,dims=4);dims=4)) -
+ (LState_ZV[:,:,:,P_] / (γ-1) +
+ 0.5/LState_ZV[:,:,:,Rho_]*$dropdims($sum(LState_ZV[:,:,:,U_].^2,dims=4);dims=4) +
+ 0.5*$dropdims($sum(LState_ZV[:,:,:,B_].^2,dims=4);dims=4)))
+
 # source
 for k = 1:nK, j = 1:nJ, i = 1:nI
    source_GV[i,j,k,Rho_] = 0.0
@@ -388,7 +525,51 @@ end
    end
 end
 
+function calc_source!(param::Param, state_GV::Array{Float64,4},
+   source_GV::Array{Float64,4})
 
+   nVar, nG = param.nVar, param.nG
+   x, y, z = param.x, param.y, param.z
+
+   iMin, iMax, jMin, jMax, kMin, kMax =
+   param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
+
+   # I can preallocate DivB and DivU!
+   nI,nJ,nK = param.nI, param.nJ, param.nK
+
+
+   # Calculate divergence of B using central difference
+   DivB = divergence_ndgrid(x,y,z,state_GV[:,:,:,B_])
+
+   source_GV[:,:,:,Rho_] .= 0.0
+
+   @inbounds for k = kMin:kMax, j = jMin:jMax, i = iMin:iMax
+      source_GV[i-nG,j-nG,k-nG,Ux_] = -state_GV[i,j,k,Bx_]*DivB[i,j,k]
+      source_GV[i-nG,j-nG,k-nG,Uy_] = -state_GV[i,j,k,By_]*DivB[i,j,k]
+      source_GV[i-nG,j-nG,k-nG,Uz_] = -state_GV[i,j,k,Bz_]*DivB[i,j,k]
+      source_GV[i-nG,j-nG,k-nG,Bx_] =  state_GV[i,j,k,Ux_]*DivB[i,j,k]
+      source_GV[i-nG,j-nG,k-nG,By_] =  state_GV[i,j,k,Uy_]*DivB[i,j,k]
+      source_GV[i-nG,j-nG,k-nG,Bz_] =  state_GV[i,j,k,Uz_]*DivB[i,j,k]
+   end
+
+   # Calculate divergence of U
+   DivU = divergence_ndgrid(x,y,z,state_GV[:,:,:,U_]./state_GV[:,:,:,Rho_])
+
+   if !param.UseConservative
+      @inbounds for k = kMin:kMax, j = jMin:jMax, i = iMin:iMax
+         source_GV[i-nG,j-nG,k-nG,P_] = -(γ-1.0)*state_GV[i,j,k,P_]*DivU[i,j,k]
+      end
+   else
+      @inbounds for k = kMin:kMax, j = jMin:jMax, i = iMin:iMax
+         ub = state_GV[i,j,k,Ux_]*state_GV[i,j,k,Bx_] +
+            state_GV[i,j,k,Uy_]*state_GV[i,j,k,By_] +
+            state_GV[i,j,k,Uz_]*state_GV[i,j,k,Bz_]
+         source_GV[i-nG,j-nG,k-nG,E_] = -ub*DivB[i,j,k]
+      end
+   end
+
+   return source_GV
+end
 
 # Update state
 @. stateNew_GV[iMin:iMax,jMin:jMax,kMin:kMax,:] =
