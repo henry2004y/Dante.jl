@@ -154,8 +154,6 @@ end
 function update_state!(param::Param, state_GV::Array{Float64,4}, dt::Float64,
    faceFlux::FaceFlux, source_GV::Array{Float64,4})
 
-   # In local timestepping, dt can be an array!
-
    Flux_XV = faceFlux.Flux_XV
    Flux_YV = faceFlux.Flux_YV
    Flux_ZV = faceFlux.Flux_ZV
