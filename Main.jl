@@ -25,7 +25,7 @@ function main()
 
    faceFluxLR, faceFlux, speedFlux = init_flux(param)
 
-   source_GV = init_source(param)
+   source_GV, div = init_source(param)
 
    time_G = init_timestep(param)
 
@@ -46,7 +46,7 @@ function main()
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            calc_source!(param, state_GV, source_GV)
+            calc_source!(param, state_GV, source_GV, div)
 
             # Calculate time step
             dt = calc_timestep!(param, speedFlux, time_G)
@@ -79,7 +79,7 @@ function main()
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            calc_source!(param, state_GV, source_GV)
+            calc_source!(param, state_GV, source_GV, div)
 
             # Calculate time step
             dt = calc_timestep!(param, speedFlux, time_G)
@@ -101,7 +101,7 @@ function main()
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            calc_source!(param, state1_GV, source_GV)
+            calc_source!(param, state1_GV, source_GV, div)
 
             # Update state
             dt *= 2.0
@@ -134,7 +134,7 @@ function main()
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            calc_source!(param, state_GV, source_GV)
+            calc_source!(param, state_GV, source_GV, div)
 
             # Calculate time step
             calc_timestep!(param, speedFlux, time_G)
@@ -162,7 +162,7 @@ function main()
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            calc_source!(param, state_GV, source_GV)
+            calc_source!(param, state_GV, source_GV, div)
 
             # Calculate time step
             calc_timestep!(param, speedFlux, time_G)
@@ -184,7 +184,7 @@ function main()
             calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
-            calc_source!(param, state1_GV, source_GV)
+            calc_source!(param, state1_GV, source_GV, div)
 
             # Update state
             time_G *= 2.0
