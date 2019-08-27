@@ -1,21 +1,28 @@
 module Source
 
-export calc_source!, init_source
+export calc_source!, init_source, Div
 
 using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
 using ..Parameters: γ
 using ..Divergence: divergence!
 
+struct Div{T<:AbstractFloat}
+   div_G::Array{T,3}
+end
+
 function init_source(param::Param)
    GridSize = param.GridSize
    nVar = param.nVar
    source_GV = Array{Float64,4}(undef, GridSize..., nVar)
+   div_G = Array{Float64,3}(undef, GridSize...)
 
-   return source_GV
+   div = Div(div_G)
+
+   return source_GV, div
 end
 
 function calc_source!(param::Param, state_GV::Array{Float64,4},
-   source_GV::Array{Float64,4})
+   source_GV::Array{Float64,4}, div::Div)
 
    nVar, nG = param.nVar, param.nG
    x, y, z = param.x, param.y, param.z
@@ -26,7 +33,7 @@ function calc_source!(param::Param, state_GV::Array{Float64,4},
    # I can preallocate div_G and DivU!
    nI,nJ,nK = param.nI, param.nJ, param.nK
 
-   div_G = Array{Float64,3}(undef, nI, nJ, nK)
+   div_G = div.div_G
    # Calculate divergence of B using central difference
    B = @view state_GV[:,:,:,B_]
    divergence!(param, B, div_G)
