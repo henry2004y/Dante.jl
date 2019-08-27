@@ -58,7 +58,8 @@ function init_flux(param::Param)
    Cmax_YF = Array{Float64,3}(undef,GridSize+[0,1,0]...)
    Cmax_ZF = Array{Float64,3}(undef,GridSize+[0,0,1]...)
 
-   faceFluxLR = FaceFluxLR(LFlux_XV,RFlux_XV,LFlux_YV,RFlux_YV,LFlux_ZV, RFlux_ZV)
+   faceFluxLR = FaceFluxLR(LFlux_XV,RFlux_XV,LFlux_YV,
+      RFlux_YV,LFlux_ZV,RFlux_ZV)
    faceFlux = FaceFlux(Flux_XV, Flux_YV, Flux_ZV)
    if param.Scheme == "Rusanov"
       speedFlux = SpeedFluxMax(Cmax_XF, Cmax_YF, Cmax_ZF)
@@ -66,7 +67,8 @@ function init_flux(param::Param)
       Cmin_XF = similar(Cmax_XF)
       Cmin_YF = similar(Cmax_YF)
       Cmin_ZF = similar(Cmax_ZF)
-      speedFlux = SpeedFluxMinMax(Cmax_XF, Cmax_YF, Cmax_ZF, Cmin_XF, Cmin_YF, Cmin_ZF)
+      speedFlux = SpeedFluxMinMax(Cmax_XF,Cmax_YF,Cmax_ZF,
+         Cmin_XF,Cmin_YF,Cmin_ZF)
    end
 
    return faceFluxLR, faceFlux, speedFlux
@@ -77,7 +79,7 @@ function calc_face_flux!(param::Param, faceValue::FaceState,
 
    get_physical_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
-   add_numerical_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR) # takes time
+   add_numerical_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
 
    return
 end
