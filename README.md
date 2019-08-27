@@ -10,6 +10,8 @@ My test shows that using SubArrays inside for loops is close to the performance 
 I made an experimental choice of adding a SubArray type of FaceState besides the copied array type. Although this would cause type instability for returning union type for calc_face_value, this has been greatly optimized since Julia 0.7 (https://julialang.org/blog/2018/08/union-splitting). The view type is only used for 1st order schemes, while others used the original arrays. (The reason is obvious when you look at the algorithms.)
 
 Further improvements may be possible for 1D and 2D to reduce unnecessary calculations.
+For example, in the flux calculations Flux_YV and Flux_ZV are not needed for 1D problems.
+However, considering that this code is mainly developed for 3D, the current style may be fine.
 
 If there are small arrays inside functions, consider using static arrays.
 
