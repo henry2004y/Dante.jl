@@ -18,3 +18,7 @@ If there are small arrays inside functions, consider using static arrays.
 @fastmath is another thing worth trying.
 
 Do I need a general divergence calculation function? Or it can be specialized to my grid size?
+
+- [ ] Convert into a package
+- [ ] GPU support
+- [ ] 2D/3D tests
