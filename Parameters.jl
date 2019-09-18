@@ -35,6 +35,7 @@ struct Param3D <: Param
    limiter::String
    TimeAccurate::Bool
    UseConservative::Bool
+   UseGPU::Bool
    iMin::Int
    iMax::Int
    jMin::Int
@@ -50,7 +51,7 @@ struct Param3D <: Param
    CFL::Float64
    nStep::Int             # Total timesteps
    tEnd::Float64
-   TypeBc::Array{String,1} # Type of boundary conditions
+   TypeBc::Vector{String} # Type of boundary conditions
    IC::String
    RiemannProblemType::Int
 
@@ -62,17 +63,17 @@ struct Param3D <: Param
    x::StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}
    y::StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}
    z::StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}
-   FullSize::Array{Int,1}
-   GridSize::Array{Int,1}
-   CellSize_D::Array{Float64,1}
+   FullSize::Vector{Int}
+   GridSize::Vector{Int}
+   CellSize_D::Vector{Float64}
 
    function Param3D(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,
-      UseConservative,iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,
+      UseConservative,UseGPU,iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,
       jMaxAll,kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,
       PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
       @assert(0 ≤ tEnd, "Simulation time must be positive!")
 
-      new(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,UseConservative,
+      new(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,UseConservative,UseGPU
          iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,jMaxAll,
          kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,PlotVar,
          x,y,z,FullSize,GridSize,CellSize_D)
@@ -107,6 +108,7 @@ function setParameters()
    CFL = paramIn["Parameters"]["CFL"]::Float64
    TimeAccurate = paramIn["Parameters"]["TimeAccurate"]::Bool
    UseConservative = paramIn["Parameters"]["UseConservative"]::Bool
+   UseGPU = paramIn["Parameters"]["UseGPU"]::Bool
    nStep  = paramIn["Parameters"]["nStep"]::Int64
    tEnd = paramIn["Parameters"]["tEnd"]::Float64
    DoPlot = paramIn["Plots"]["DoPlot"]::Bool
@@ -172,7 +174,7 @@ function setParameters()
    end
 
    param = Param3D(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,
-      UseConservative,iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,
+      UseConservative,UseGPU,iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,
       jMaxAll,kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,
       PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
 end
