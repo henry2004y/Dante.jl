@@ -6,17 +6,18 @@ CFL        = 0.9
 limiter    = "MM"
 TimeAccurate = true
 UseConservative = true
+UseGPU     = false
 
-IC         = "Riemann"
+IC         = "density wave"
 RiemannProblemType = 1
 
 nStep      = 100
-tEnd       = 0.1
+tEnd       = 0.01
 
 [Grid]
 TypeGrid   = "Cartesian"
 xyzMinMax  = [[0.0, 1.0]]
-nI = 1000
+nI = 10000
 nJ = 1
 nK = 1
 BCtype = ["float","float"]
@@ -25,7 +26,7 @@ BCtype = ["float","float"]
 [Plots]
 DoPlot = true
 PlotVar = "rho"
-PlotInterval = 10
+PlotInterval = 1000
 
 PlotType = [
   "x",
