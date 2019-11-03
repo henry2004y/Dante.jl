@@ -7,23 +7,23 @@ Finite volume MHD simulation with structured mesh. This is rewritten from the Ma
 
 * nD: dimension of the system
   * 1, 2, 3
-* Scheme:     
+* Scheme: numerical schemes to be used
   * "Rusanov"
   * "HLLE"
-* Order:
+* Order: order of accuracy
   * 1
   * 2
 * CFL: stability control parameter, (0,1)
-* limiter
+* limiter: slope limiter for the 2nd order schemes
   * "MM": minmod
   * "MC":
-* TimeAccurate:
+* TimeAccurate: logical for running in time accurate mode
   * true
   * false
-* UseConservative
+* UseConservative: logical for using energy conservation equation
   * true
   * false
-* IC
+* IC: initial conditions
   * "density wave"
   * "square wave"
   * "contact discontinuity"
@@ -79,3 +79,4 @@ Do I need a general divergence calculation function? Or it can be specialized to
 - [ ] Convert into a package
 - [ ] GPU support
 - [ ] 2D/3D tests
+- [ ] MHD tests
