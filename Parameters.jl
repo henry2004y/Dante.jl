@@ -73,7 +73,7 @@ struct Param3D <: Param
       PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
       @assert(0 ≤ tEnd, "Simulation time must be positive!")
 
-      new(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,UseConservative,UseGPU
+      new(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,UseConservative,UseGPU,
          iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,jMaxAll,
          kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,PlotVar,
          x,y,z,FullSize,GridSize,CellSize_D)
@@ -140,11 +140,11 @@ function setParameters()
    # Size including ghost cells
    FullSize   = GridSize .+ 2*nG
 
-   x = range(CoordMinMax_D[1,1] - (0.5-nG)*CellSize_D[1],
+   x = range(CoordMinMax_D[1,1] + (0.5-nG)*CellSize_D[1],
       CoordMinMax_D[2,1] + (nG-0.5)*CellSize_D[1], length=FullSize[1])
-   y = range(CoordMinMax_D[1,2] - (0.5-nG)*CellSize_D[2],
+   y = range(CoordMinMax_D[1,2] + (0.5-nG)*CellSize_D[2],
       CoordMinMax_D[2,2] + (nG-0.5)*CellSize_D[2], length=FullSize[2])
-   z = range(CoordMinMax_D[1,3] - (0.5-nG)*CellSize_D[3],
+   z = range(CoordMinMax_D[1,3] + (0.5-nG)*CellSize_D[3],
       CoordMinMax_D[2,3] + (nG-0.5)*CellSize_D[3], length=FullSize[3])
 
    # Indexes for physical cells
