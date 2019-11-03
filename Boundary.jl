@@ -79,7 +79,7 @@ function set_cell_boundary!(param::Param, state_GV::Array{Float64,4})
                state_GV[i,j,k,iVar] = state_GV[i,j,kMin,iVar]
             end
          elseif iBc == 6
-            @inbounds for iVar=1:nVar, k=1:nG, j=jMin:jMax, i=iMin:iMax
+            @inbounds for iVar=1:nVar, k=kMax+1:kMaxAll, j=jMin:jMax, i=iMin:iMax
                state_GV[i,j,k,iVar] = state_GV[i,j,kMax,iVar]
             end
          end
