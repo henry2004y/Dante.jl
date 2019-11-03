@@ -1,6 +1,6 @@
 module FaceValue
 
-export calc_face_value, init_face_value, FaceState, FaceGradient
+export calc_face_value!, init_face_value, FaceState, FaceGradient
 
 using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
 
@@ -44,9 +44,9 @@ end
 
 function init_face_value(param::Param)
 
-   if param.Order == 2
-      nI, nJ, nK, nVar = param.nI, param.nJ, param.nK, param.nVar
+   nI, nJ, nK, nVar = param.nI, param.nJ, param.nK, param.nVar
 
+   if param.Order == 2
       dq_X = Array{Float64,4}(undef,nI+2,nJ,nK,nVar)
       dq_Y = Array{Float64,4}(undef,nI,nJ+2,nK,nVar)
       dq_Z = Array{Float64,4}(undef,nI,nJ,nK+2,nVar)
@@ -77,8 +77,8 @@ function init_face_value(param::Param)
       RState_ZV = @view temp[1:1,1:1,1:1,:]
 
       faceGradient = FaceGradient(dq_X, dq_Y, dq_Z)
-      faceState = FaceStateView(LState_XV,RState_XV,LState_YV,RState_YV,
-         LState_ZV,RState_ZV)
+      faceState = FaceStateView(LState_XV, RState_XV, LState_YV, RState_YV,
+         LState_ZV, RState_ZV)
    end
 
    return faceState, faceGradient
@@ -86,8 +86,9 @@ end
 
 """
 Type instability for the return type is introduced, but it seems ok.
+I don't know how to modify faceState for views in 1st order.
 """
-function calc_face_value(param::Param, state_GV::Array{Float64,4},
+function calc_face_value!(param::Param, state_GV::Array{Float64,4},
    faceState::FaceState, faceGradient::FaceGradient)
 
    if param.Order == 1
@@ -101,8 +102,8 @@ function calc_face_value(param::Param, state_GV::Array{Float64,4},
       LState_ZV = @view state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax,:]
       RState_ZV = @view state_GV[iMin:iMax,jMin:jMax,kMin:kMax+1,:]
 
-      faceState = FaceStateView(LState_XV,RState_XV,LState_YV,RState_YV,
-         LState_ZV,RState_ZV)
+      faceState = FaceStateView(LState_XV, RState_XV, LState_YV, RState_YV,
+         LState_ZV, RState_ZV)
    elseif param.Order == 2
       # Compute and limit slopes
       nI,nJ,nK,nG,nVar = param.nI, param.nJ, param.nK, param.nG, param.nVar
@@ -120,23 +121,23 @@ function calc_face_value(param::Param, state_GV::Array{Float64,4},
          # Find dq_j = minmod{fwd diff, bwd diff, cntrl diff}
 
          @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI+2
-            dqR_X = state_GV[i+2,j,k,iVar] - state_GV[i+1,j,k,iVar]
-            dqL_X = state_GV[i+1,j,k,iVar] - state_GV[i,j,k,iVar]
-            dqC_X = state_GV[i+2,j,k,iVar] - state_GV[i,j,k,iVar]
+            dqR_X = state_GV[i+2,j+nG,k+nG,iVar] - state_GV[i+1,j+nG,k+nG,iVar]
+            dqL_X = state_GV[i+1,j+nG,k+nG,iVar] - state_GV[i,j+nG,k+nG,iVar]
+            dqC_X = state_GV[i+2,j+nG,k+nG,iVar] - state_GV[i,j+nG,k+nG,iVar]
             dq_X[i,j,k,iVar] = minmod(dqR_X, dqL_X, dqC_X)
          end
 
          @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ+2, i=1:nI
-            dqR_Y = state_GV[i,j+2,k,iVar] - state_GV[i,j+1,k,iVar]
-            dqL_Y = state_GV[i,j+1,k,iVar] - state_GV[i,j,k,iVar]
-            dqC_Y = state_GV[i,j+2,k,iVar] - state_GV[i,j,k,iVar]
+            dqR_Y = state_GV[i+nG,j+2,k+nG,iVar] - state_GV[i+nG,j+1,k+nG,iVar]
+            dqL_Y = state_GV[i+nG,j+1,k+nG,iVar] - state_GV[i+nG,j,k+nG,iVar]
+            dqC_Y = state_GV[i+nG,j+2,k+nG,iVar] - state_GV[i+nG,j,k+nG,iVar]
             dq_Y[i,j,k,iVar] = minmod(dqR_Y, dqL_Y, dqC_Y)
          end
 
          @inbounds for iVar=1:nVar, k=1:nK+2, j=1:nJ, i=1:nI
-            dqR_Z = state_GV[i,j,k+2,iVar] - state_GV[i,j,k+1,iVar]
-            dqL_Z = state_GV[i,j,k+1,iVar] - state_GV[i,j,k,iVar]
-            dqC_Y = state_GV[i,j,k+2,iVar] - state_GV[i,j,k,iVar]
+            dqR_Z = state_GV[i+nG,j+nG,k+2,iVar] - state_GV[i+nG,j+nG,k+1,iVar]
+            dqL_Z = state_GV[i+nG,j+nG,k+1,iVar] - state_GV[i+nG,j+nG,k,iVar]
+            dqC_Y = state_GV[i+nG,j+nG,k+2,iVar] - state_GV[i+nG,j+nG,k,iVar]
             dq_Z[i,j,k,iVar] = minmod(dqR_Z, dqL_Z, dqL_Z)
          end
 
@@ -144,20 +145,20 @@ function calc_face_value(param::Param, state_GV::Array{Float64,4},
          # Find dq_j = minmod{fwd diff, bwd diff}
 
          @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI+2
-            dqR_X = state_GV[i+2,j,k,iVar] - state_GV[i+1,j,k,iVar]
-            dqL_X = state_GV[i+1,j,k,iVar] - state_GV[i,j,k,iVar]
+            dqR_X = state_GV[i+2,j+nG,k+nG,iVar] - state_GV[i+1,j+nG,k+nG,iVar]
+            dqL_X = state_GV[i+1,j+nG,k+nG,iVar] - state_GV[i,j+nG,k+nG,iVar]
             dq_X[i,j,k,iVar] = minmod(dqR_X, dqL_X)
          end
 
          @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ+2, i=1:nI
-            dqR_Y = state_GV[i,j+2,k,iVar] - state_GV[i,j+1,k,iVar]
-            dqL_Y = state_GV[i,j+1,k,iVar] - state_GV[i,j,k,iVar]
+            dqR_Y = state_GV[i+nG,j+2,k+nG,iVar] - state_GV[i+nG,j+1,k+nG,iVar]
+            dqL_Y = state_GV[i+nG,j+1,k+nG,iVar] - state_GV[i+nG,j,k+nG,iVar]
             dq_Y[i,j,k,iVar] = minmod(dqR_Y, dqL_Y)
          end
 
          @inbounds for iVar=1:nVar, k=1:nK+2, j=1:nJ, i=1:nI
-            dqR_Z = state_GV[i,j,k+2,iVar] - state_GV[i,j,k+1,iVar]
-            dqL_Z = state_GV[i,j,k+1,iVar] - state_GV[i,j,k,iVar]
+            dqR_Z = state_GV[i+nG,j+nG,k+2,iVar] - state_GV[i+nG,j+nG,k+1,iVar]
+            dqL_Z = state_GV[i+nG,j+nG,k+1,iVar] - state_GV[i+nG,j+nG,k,iVar]
             dq_Z[i,j,k,iVar] = minmod(dqR_Z, dqL_Z)
          end
       end
@@ -177,7 +178,7 @@ function calc_face_value(param::Param, state_GV::Array{Float64,4},
       end
       @inbounds for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
          RState_YV[i,j,k,iVar] = state_GV[i+nG,j+nG,k+nG,iVar] -
-            0.5*dq_Y[i+1,j,k,iVar]
+            0.5*dq_Y[i,j+1,k,iVar]
       end
       @inbounds for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
          LState_ZV[i,j,k,iVar] = state_GV[i+nG,j+nG,k+nG-1,iVar] +
@@ -185,7 +186,7 @@ function calc_face_value(param::Param, state_GV::Array{Float64,4},
       end
       @inbounds for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
          RState_ZV[i,j,k,iVar] = state_GV[i+nG,j+nG,k+nG,iVar] -
-            0.5*dq_Z[i+1,j,k,iVar]
+            0.5*dq_Z[i,j,k+1,iVar]
       end
    end
 
