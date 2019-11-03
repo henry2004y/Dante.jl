@@ -1,6 +1,63 @@
 # DanteJulia
 Finite volume MHD simulation with structured mesh. This is rewritten from the Matlab version, with improved performance and capabilities.
 
+## Commands
+
+### Parameters
+
+* nD: dimension of the system
+  * 1, 2, 3
+* Scheme:     
+  * "Rusanov"
+  * "HLLE"
+* Order:
+  * 1
+  * 2
+* CFL: stability control parameter, (0,1)
+* limiter
+  * "MM": minmod
+  * "MC":
+* TimeAccurate:
+  * true
+  * false
+* UseConservative
+  * true
+  * false
+* IC
+  * "density wave"
+  * "square wave"
+  * "contact discontinuity"
+  * "Riemann"
+* RiemannProblemType: [1,12]
+* nStep: total number of steps
+* tEnd: end time in time accurate mode
+
+### Grid
+* TypeGrid: coordinate system
+  * "Cartesian"
+* xyzMinMax: range of the coordinates
+  * [[0.0, 1.0]]
+* nI: number of cells in the first dimension
+* nJ: number of cells in the second dimension
+* nK: number of cells in the third dimension
+* BCtype: boundary conditions
+  * ["float", "float"]
+  * ["periodic", "periodic"]
+
+### Plots
+* DoPlot: logicals for plotting
+  * true
+  * false
+* PlotVar: variable name to be plotted
+  * "rho"
+  * "ux"
+  * "p"
+* PlotInterval: plotting frequency in steps
+* PlotType: type of plots
+  * ["x", "1D"]
+
+## Issues
+
 One issue I encountered is using @view for face values. This greatly slows down the flux calculations because of heap allocated memories. As suggested by Roger on Julia's Chinese forum, one workaround is to use the unsafeArrays.jl package to allocate @view memory on the stack. This is worth trying because for the current implementation, LState_XV and RState_XV are just shifts of the original array State_GV. Ideally there is no need to copy the data: using pointers/views should be enough.
 
 Let me create a simple scenario to deal with the problem and find out a solution. The package UNsafeArray.jl is worth trying.
