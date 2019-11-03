@@ -134,14 +134,14 @@ function set_init(param::Param)
 
       # Initial Condition for our 1D domain
       # Density
-      density[1:floor(Int,nI/2)+nG,:,:] .= rho[1] # region 1
-      density[floor(Int,nI/2+1)+nG:end,:,:] .= rho[2] # region 2
+      density[1:floor(Int,nI/2)+nG+1,:,:] .= rho[1] # region 1
+      density[floor(Int,nI/2)+nG+2:end,:,:] .= rho[2] # region 2
       # Velocity in x
-      velocity[1:floor(Int,nI/2)+nG,:,:,1] .= u[1] # region 1
-      velocity[floor(Int,nI/2+1)+nG:end,:,:,1] .= u[2] # region 2
+      velocity[1:floor(Int,nI/2)+nG+1,:,:,1] .= u[1] # region 1
+      velocity[floor(Int,nI/2)+nG+2:end,:,:,1] .= u[2] # region 2
       # Pressure
-      pressure[1:floor(Int,nI/2)+nG,:,:] .= p[1] # region 1
-      pressure[floor(Int,nI/2+1)+nG:end,:,:] .= p[2] # region 2
+      pressure[1:floor(Int,nI/2)+nG+1,:,:] .= p[1] # region 1
+      pressure[floor(Int,nI/2)+nG+2:end,:,:] .= p[2] # region 2
 
    else
       error("unknown initial condition type!")
@@ -168,7 +168,7 @@ function update_state!(param::Param, state_GV::Array{Float64,4}, dt::Float64,
       # No need for volume and face if the grid is uniform Cartesian
       if !param.UseConservative
          @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
-            state_GV[i+nG,j+nG,k+nG,iVar] -= dt*( source_GV[i,j,k,iVar] +
+            state_GV[i+nG,j+nG,k+nG,iVar] -= dt*( -source_GV[i,j,k,iVar] +
             (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
             (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
             (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k,iVar])/CellSize_D[3])
@@ -196,7 +196,7 @@ function update_state!(param::Param, state_GV::Array{Float64,4}, dt::Float64,
             b = state_GV[i+nG,j+nG,k+nG,Bx_]^2 + state_GV[i+nG,j+nG,k+nG,By_]^2 +
                state_GV[i+nG,j+nG,k+nG,Bz_]^2
 
-            state_GV[i+nG,j+nG,k+nG,E_] -= dt*(source_GV[i,j,k,E_] +
+            state_GV[i+nG,j+nG,k+nG,E_] -= dt*(-source_GV[i,j,k,E_] +
                (Flux_XV[i+1,j,k,E_] - Flux_XV[i,j,k,E_])/CellSize_D[1] +
                (Flux_YV[i,j+1,k,E_] - Flux_YV[i,j,k,E_])/CellSize_D[2] +
                (Flux_ZV[i,j,k+1,E_] - Flux_ZV[i,j,k,E_])/CellSize_D[3])
@@ -230,7 +230,7 @@ function update_state!(param::Param, state_GV::Array{Float64,4},
       # No need for volume and face if the grid is uniform Cartesian
       if !param.UseConservative
          @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
-            state_GV[i+nG,j+nG,k+nG,iVar] -= dt[i,j,k]*( source_GV[i,j,k,iVar] +
+            state_GV[i+nG,j+nG,k+nG,iVar] -= dt[i,j,k]*(-source_GV[i,j,k,iVar] +
             (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
             (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
             (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k,iVar])/CellSize_D[3])
@@ -258,7 +258,7 @@ function update_state!(param::Param, state_GV::Array{Float64,4},
             b = state_GV[i+nG,j+nG,k+nG,Bx_]^2 + state_GV[i+nG,j+nG,k+nG,By_]^2 +
                state_GV[i+nG,j+nG,k+nG,Bz_]^2
 
-            state_GV[i+nG,j+nG,k+nG,E_] -= dt[i,j,k]*(source_GV[i,j,k,E_] +
+            state_GV[i+nG,j+nG,k+nG,E_] -= dt[i,j,k]*(-source_GV[i,j,k,E_] +
                (Flux_XV[i+1,j,k,E_] - Flux_XV[i,j,k,E_])/CellSize_D[1] +
                (Flux_YV[i,j+1,k,E_] - Flux_YV[i,j,k,E_])/CellSize_D[2] +
                (Flux_ZV[i,j,k+1,E_] - Flux_ZV[i,j,k,E_])/CellSize_D[3])
