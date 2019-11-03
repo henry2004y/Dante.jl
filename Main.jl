@@ -40,10 +40,10 @@ function main()
             set_cell_boundary!(param, state_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state_GV,faceState,faceGradient)
+            faceState = calc_face_value!(param, state_GV, faceState,faceGradient)
 
             # Calculate face flux
-            calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
+            calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
             calc_source!(param, state_GV, source_GV, div)
@@ -54,13 +54,13 @@ function main()
             if t + dt > param.tEnd dt = param.tEnd - t end
 
             # Update state
-            update_state!(param,state_GV,dt,faceFlux,source_GV)
+            update_state!(param, state_GV, dt, faceFlux, source_GV)
 
             t  += dt
             it += 1
 
-            if mod(it,param.PlotInterval) == 0
-               plotvar(param,it,state_GV)
+            if mod(it, param.PlotInterval) == 0
+               plotvar(param, it, state_GV)
             end
 
             @printf("it,t=%d, %7.4f\n", it, t)
@@ -73,10 +73,10 @@ function main()
             set_cell_boundary!(param, state_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state_GV,faceState,faceGradient)
+            calc_face_value!(param, state_GV, faceState,faceGradient)
 
             # Calculate face flux
-            calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
+            calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
             calc_source!(param, state_GV, source_GV, div)
@@ -87,7 +87,7 @@ function main()
             # Update state in the 1st stage
             dt *= 0.5
             state1_GV = copy(state_GV)
-            update_state!(param,state1_GV,dt,faceFlux,source_GV)
+            update_state!(param, state1_GV, dt, faceFlux, source_GV)
 
             # 2nd stage of modified timestepping
 
@@ -95,25 +95,25 @@ function main()
             set_cell_boundary!(param, state1_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state1_GV,faceState,faceGradient)
+            calc_face_value!(param, state1_GV, faceState, faceGradient)
 
             # Calculate face flux
-            calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
+            calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
             calc_source!(param, state1_GV, source_GV, div)
 
             # Update state
             dt *= 2.0
-            update_state!(param,state_GV,dt,faceFlux,source_GV)
+            update_state!(param, state_GV, dt, faceFlux, source_GV)
 
             if t + dt > param.tEnd dt = param.tEnd - t end
 
             t  += dt
             it += 1
 
-            if mod(it,param.PlotInterval) == 0
-               plotvar(param,it,state_GV)
+            if mod(it, param.PlotInterval) == 0
+               plotvar(param, it, state_GV)
             end
 
             @printf("it,t=%d, %7.4f\n", it, t)
@@ -128,10 +128,10 @@ function main()
             set_cell_boundary!(param, state_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state_GV,faceState,faceGradient)
+            faceState = calc_face_value!(param, state_GV,faceState,faceGradient)
 
             # Calculate face flux
-            calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
+            calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
             calc_source!(param, state_GV, source_GV, div)
@@ -144,8 +144,8 @@ function main()
 
             it += 1
 
-            if mod(it,param.PlotInterval) == 0
-               plotvar(param,it,state_GV)
+            if mod(it, param.PlotInterval) == 0
+               plotvar(param, it, state_GV)
             end
 
             @printf("it=%d\n", it)
@@ -156,10 +156,10 @@ function main()
             set_cell_boundary!(param, state_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state_GV,faceState,faceGradient)
+            calc_face_value!(param, state_GV, faceState, faceGradient)
 
             # Calculate face flux
-            calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
+            calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
             calc_source!(param, state_GV, source_GV, div)
@@ -170,7 +170,7 @@ function main()
             # Update state in the 1st stage
             time_G .*= 0.5
             state1_GV = copy(state_GV)
-            update_state!(param,state1_GV,time_G,faceFlux,source_GV)
+            update_state!(param, state1_GV, time_G, faceFlux, source_GV)
 
             # 2nd stage of modified timestepping
 
@@ -178,22 +178,22 @@ function main()
             set_cell_boundary!(param, state1_GV)
 
             # Calculate face value
-            faceValue = calc_face_value(param, state1_GV,faceState,faceGradient)
+            calc_face_value!(param, state1_GV, faceState, faceGradient)
 
             # Calculate face flux
-            calc_face_flux!(param, faceValue, faceFlux, speedFlux, faceFluxLR)
+            calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
             # Calculate source
             calc_source!(param, state1_GV, source_GV, div)
 
             # Update state
             time_G *= 2.0
-            update_state!(param,state_GV,time_G,faceFlux,source_GV)
+            update_state!(param, state_GV, time_G, faceFlux, source_GV)
 
             it += 1
 
-            if mod(it,param.PlotInterval) == 0
-               plotvar(param,it,state_GV)
+            if mod(it, param.PlotInterval) == 0
+               plotvar(param, it, state_GV)
             end
 
             @printf("it=%d\n", it)
