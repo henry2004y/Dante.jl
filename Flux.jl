@@ -201,7 +201,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
          RState_XV[i,j,k,Bx_]*RState_XV[i,j,k,Uz_]
    end
 
-   for k = 1:nK, j = 1:nJ+1, i = 1:nI
+   @inbounds for k = 1:nK, j = 1:nJ+1, i = 1:nI
       LFlux_YV[i,j,k,Bx_] = LState_YV[i,j,k,Uy_]*LState_YV[i,j,k,Bx_] -
          LState_YV[i,j,k,By_]*LState_YV[i,j,k,Ux_]
       RFlux_YV[i,j,k,Bx_] = RState_YV[i,j,k,Uy_]*RState_YV[i,j,k,Bx_] -
@@ -229,15 +229,21 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
 
    # Pressure flux / energy flux
    if !param.UseConservative
-      @inbounds for k = 1:nK+1, j = 1:nJ, i = 1:nI
+      @inbounds for k = 1:nK, j = 1:nJ, i = 1:nI+1
          LFlux_XV[i,j,k,P_] = LState_XV[i,j,k,P_]*LState_XV[i,j,k,Ux_]/
             LState_XV[i,j,k,Rho_]
          RFlux_XV[i,j,k,P_] = RState_XV[i,j,k,P_]*RState_XV[i,j,k,Ux_]/
             RState_XV[i,j,k,Rho_]
+      end
+
+      @inbounds for k = 1:nK, j = 1:nJ+1, i = 1:nI
          LFlux_YV[i,j,k,P_] = LState_YV[i,j,k,P_]*LState_YV[i,j,k,Uy_]/
             LState_YV[i,j,k,Rho_]
          RFlux_YV[i,j,k,P_] = RState_YV[i,j,k,P_]*RState_YV[i,j,k,Uy_]/
             RState_YV[i,j,k,Rho_]
+      end
+
+      @inbounds for k = 1:nK+1, j = 1:nJ, i = 1:nI
          LFlux_ZV[i,j,k,P_] = LState_ZV[i,j,k,P_]*LState_ZV[i,j,k,Uz_]/
             LState_ZV[i,j,k,Rho_]
          RFlux_ZV[i,j,k,P_] = RState_ZV[i,j,k,P_]*RState_ZV[i,j,k,Uz_]/
@@ -281,7 +287,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
          ub= LState_YV[i,j,k,Ux_]*LState_YV[i,j,k,Bx_] +
             LState_YV[i,j,k,Uy_]*LState_YV[i,j,k,By_] +
             LState_YV[i,j,k,Uz_]*LState_YV[i,j,k,Bz_]
-         LFlux_YV[i,j,k,E_] = LState_YV[i,j,k,Ux_]/LState_YV[i,j,k,Rho_]*
+         LFlux_YV[i,j,k,E_] = LState_YV[i,j,k,Uy_]/LState_YV[i,j,k,Rho_]*
             ((LState_YV[i,j,k,P_]/(γ-1.0) + 0.5/LState_YV[i,j,k,Rho_]*u +
             0.5*b + LState_YV[i,j,k,P_] + 0.5*b)) - ub *
             LState_YV[i,j,k,Bx_]
@@ -295,7 +301,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
          ub= RState_YV[i,j,k,Ux_]*RState_YV[i,j,k,Bx_] +
             RState_YV[i,j,k,Uy_]*RState_YV[i,j,k,By_] +
             RState_YV[i,j,k,Uz_]*RState_YV[i,j,k,Bz_]
-         RFlux_YV[i,j,k,E_] = RState_YV[i,j,k,Ux_]/RState_YV[i,j,k,Rho_]*
+         RFlux_YV[i,j,k,E_] = RState_YV[i,j,k,Uy_]/RState_YV[i,j,k,Rho_]*
             ((RState_YV[i,j,k,P_]/(γ-1.0) + 0.5/RState_YV[i,j,k,Rho_]*u +
             0.5*b + RState_YV[i,j,k,P_] + 0.5*b)) - ub *
             RState_YV[i,j,k,Bx_]
@@ -309,7 +315,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
          ub= LState_ZV[i,j,k,Ux_]*LState_ZV[i,j,k,Bx_] +
             LState_ZV[i,j,k,Uy_]*LState_ZV[i,j,k,By_] +
             LState_ZV[i,j,k,Uz_]*LState_ZV[i,j,k,Bz_]
-         LFlux_ZV[i,j,k,E_] = LState_ZV[i,j,k,Ux_]/LState_ZV[i,j,k,Rho_]*
+         LFlux_ZV[i,j,k,E_] = LState_ZV[i,j,k,Uz_]/LState_ZV[i,j,k,Rho_]*
             ((LState_ZV[i,j,k,P_]/(γ-1.0) + 0.5/LState_ZV[i,j,k,Rho_]*u +
             0.5*b + LState_ZV[i,j,k,P_] + 0.5*b)) - ub *
             LState_ZV[i,j,k,Bx_]
@@ -323,7 +329,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
          ub= RState_ZV[i,j,k,Ux_]*RState_ZV[i,j,k,Bx_] +
             RState_ZV[i,j,k,Uy_]*RState_ZV[i,j,k,By_] +
             RState_ZV[i,j,k,Uz_]*RState_ZV[i,j,k,Bz_]
-         RFlux_ZV[i,j,k,E_] = RState_ZV[i,j,k,Ux_]/RState_ZV[i,j,k,Rho_]*
+         RFlux_ZV[i,j,k,E_] = RState_ZV[i,j,k,Uz_]/RState_ZV[i,j,k,Rho_]*
             ((RState_ZV[i,j,k,P_]/(γ-1.0) + 0.5/RState_ZV[i,j,k,Rho_]*u +
             0.5*b + RState_ZV[i,j,k,P_] + 0.5*b)) - ub *
             RState_ZV[i,j,k,Bx_]
@@ -371,8 +377,14 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
          @inbounds for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
             Flux_XV[i,j,k,iVar] -= 0.5*Cmax_XF[i,j,k]*(RState_XV[i,j,k,iVar] -
                LState_XV[i,j,k,iVar])
+         end
+
+         @inbounds for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
             Flux_YV[i,j,k,iVar] -= 0.5*Cmax_YF[i,j,k]*(RState_YV[i,j,k,iVar] -
                LState_YV[i,j,k,iVar])
+         end
+
+         @inbounds for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
             Flux_ZV[i,j,k,iVar] -= 0.5*Cmax_ZF[i,j,k]*(RState_ZV[i,j,k,iVar] -
                LState_ZV[i,j,k,iVar])
          end
@@ -515,7 +527,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                (RState_XV[i,j,k,P_] / (γ-1) +
                0.5/RState_XV[i,j,k,Rho_]*uR + 0.5*bR) -
                (LState_XV[i,j,k,P_] / (γ-1) +
-               0.5/LState_XV[:,:,:,Rho_]*uL + 0.5*bL) )
+               0.5/LState_XV[i,j,k,Rho_]*uL + 0.5*bL) )
          end
 
          @inbounds for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ+1, i = 1:nI
@@ -597,8 +609,8 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
          (LS_XV[i,j,k,By_] + RS_XV[i,j,k,By_])^2 +
          (LS_XV[i,j,k,Bz_] + RS_XV[i,j,k,Bz_])^2 ) /
          (2.0*(LS_XV[i,j,k,Rho_] + RS_XV[i,j,k,Rho_]))
-      Can2_XF = ( (LS_XV[i,j,k,Bx_] .+ RS_XV[i,j,k,Bx_])^2 ) /
-         (2.0 *(LS_XV[i,j,k,Rho_] + RS_XV[i,j,k,Rho_]))
+      Can2_XF = ( (LS_XV[i,j,k,Bx_] + RS_XV[i,j,k,Bx_])^2 ) /
+         (2.0*(LS_XV[i,j,k,Rho_] + RS_XV[i,j,k,Rho_]))
       Cmax_XF[i,j,k] = 0.5 * abs(LS_XV[i,j,k,Ux_]/LS_XV[i,j,k,Rho_] +
          RS_XV[i,j,k,Ux_]/RS_XV[i,j,k,Rho_]) + sqrt( 0.5*(Cs2_XF + Ca2_XF +
          sqrt((Cs2_XF + Ca2_XF)^2 - 4.0*Cs2_XF*Can2_XF)) )
@@ -610,9 +622,9 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
       Ca2_YF = ( (LS_YV[i,j,k,Bx_] + RS_YV[i,j,k,Bx_])^2 +
          (LS_YV[i,j,k,By_] + RS_YV[i,j,k,By_])^2 +
          (LS_YV[i,j,k,Bz_] + RS_YV[i,j,k,Bz_])^2 ) /
-         (2.0 *(LS_YV[i,j,k,Rho_] + RS_YV[i,j,k,Rho_]))
+         (2.0*(LS_YV[i,j,k,Rho_] + RS_YV[i,j,k,Rho_]))
       Can2_YF = ( (LS_YV[i,j,k,By_] + RS_YV[i,j,k,By_])^2 ) /
-         (2.0 *(LS_YV[i,j,k,Rho_] + RS_YV[i,j,k,Rho_]))
+         (2.0*(LS_YV[i,j,k,Rho_] + RS_YV[i,j,k,Rho_]))
       Cmax_YF[i,j,k] = 0.5 * abs(LS_YV[i,j,k,Uy_]/LS_YV[i,j,k,Rho_] +
          RS_YV[i,j,k,Uy_]/RS_YV[i,j,k,Rho_]) + sqrt( 0.5*(Cs2_YF + Ca2_YF +
          sqrt((Cs2_YF + Ca2_YF)^2 - 4.0*Cs2_YF*Can2_YF)) )
@@ -624,9 +636,9 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
       Ca2_ZF = ( (LS_ZV[i,j,k,Bx_] + RS_ZV[i,j,k,Bx_])^2 +
          (LS_ZV[i,j,k,By_] + RS_ZV[i,j,k,By_])^2 +
          (LS_ZV[i,j,k,Bz_] + RS_ZV[i,j,k,Bz_])^2 ) /
-         (2.0 *(LS_ZV[i,j,k,Rho_] + RS_ZV[i,j,k,Rho_]))
+         (2.0*(LS_ZV[i,j,k,Rho_] + RS_ZV[i,j,k,Rho_]))
       Can2_ZF = ( (LS_ZV[i,j,k,Bz_] + RS_ZV[i,j,k,Bz_])^2 ) /
-         (2.0 *(LS_ZV[i,j,k,Rho_] + RS_ZV[i,j,k,Rho_]))
+         (2.0*(LS_ZV[i,j,k,Rho_] + RS_ZV[i,j,k,Rho_]))
       Cmax_ZF[i,j,k] = 0.5 * abs(LS_ZV[i,j,k,Uz_]/LS_ZV[i,j,k,Rho_] +
          RS_ZV[i,j,k,Uz_]/RS_ZV[i,j,k,Rho_]) + sqrt( 0.5*(Cs2_ZF + Ca2_ZF +
          sqrt((Cs2_ZF + Ca2_ZF)^2 - 4.0*Cs2_ZF*Can2_ZF)) )
@@ -678,7 +690,7 @@ function get_speed_maxmin!(param::Param, faceValue::FaceState,
       Ca2_LYF = (LS_YV[i,j,k,Bx_]^2 + LS_YV[i,j,k,By_]^2 + LS_YV[i,j,k,Bz_]^2) /
          LS_YV[i,j,k,Rho_]
       Can2_LYF = LS_YV[i,j,k,Bx_]^2 / LS_YV[i,j,k,Rho_]
-      u_LYF = LS_YV[i,j,k,Ux_]/LS_YV[i,j,k,Rho_]
+      u_LYF = LS_YV[i,j,k,Uy_]/LS_YV[i,j,k,Rho_]
       c_LYF = sqrt( 0.5*(Cs2_LYF + Ca2_LYF +
          sqrt((Cs2_LYF + Ca2_LYF)^2 - 4.0*Cs2_LYF*Can2_LYF)) )
 
@@ -707,7 +719,7 @@ function get_speed_maxmin!(param::Param, faceValue::FaceState,
       Ca2_RZF = (RS_ZV[i,j,k,Bx_]^2 + RS_ZV[i,j,k,By_]^2 + RS_ZV[i,j,k,Bz_]^2) /
          RS_ZV[i,j,k,Rho_]
       Can2_RZF = RS_ZV[i,j,k,Bx_]^2 / RS_ZV[i,j,k,Rho_]
-      u_RZF = RS_ZV[i,j,k,Ux_]/RS_ZV[i,j,k,Rho_]
+      u_RZF = RS_ZV[i,j,k,Uz_]/RS_ZV[i,j,k,Rho_]
       c_RZF = sqrt( 0.5*(Cs2_RZF + Ca2_RZF +
          sqrt((Cs2_RZF + Ca2_RZF)^2 - 4.0*Cs2_RZF*Can2_RZF)) )
 
