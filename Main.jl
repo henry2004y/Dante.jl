@@ -10,10 +10,11 @@ include("State.jl")
 include("Boundary.jl")
 include("Source.jl")
 include("Time.jl")
+include("IO.jl")
 
 using Printf
 using .Parameters, .Divergence, .State, .Boundary, .FaceValue, .Flux, .Source
-using .Time
+using .Time, .IO
 
 function main()
 
@@ -199,6 +200,11 @@ function main()
             @printf("it=%d\n", it)
          end
       end
+   end
+
+   # Compare with analytical solution, if possible
+   if param.IC == "Riemann"
+      plot_Riemann_exact(param)
    end
 
 end
