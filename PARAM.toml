@@ -1,6 +1,6 @@
 [Parameters]
 nD = 1			# Dimension of the system
-Scheme     = "Rusanov"
+Scheme     = "HLLE"
 Order      = 2
 CFL        = 0.9
 limiter    = "MM"
@@ -8,16 +8,16 @@ TimeAccurate = true
 UseConservative = true
 UseGPU     = false
 
-IC         = "density wave"
+IC         = "Riemann"
 RiemannProblemType = 1
 
 nStep      = 100
-tEnd       = 0.01
+tEnd       = 0.1
 
 [Grid]
 TypeGrid   = "Cartesian"
 xyzMinMax  = [[0.0, 1.0]]
-nI = 10000
+nI = 101
 nJ = 1
 nK = 1
 BCtype = ["float","float"]
@@ -25,8 +25,8 @@ BCtype = ["float","float"]
 
 [Plots]
 DoPlot = true
-PlotVar = "rho"
-PlotInterval = 1000
+PlotVar = "ux"
+PlotInterval = 25
 
 PlotType = [
   "x",
