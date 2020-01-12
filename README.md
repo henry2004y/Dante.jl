@@ -76,9 +76,13 @@ If there are small arrays inside functions, consider using static arrays.
 
 Do I need a general divergence calculation function? Or it can be specialized to my grid size?
 
+There are optional parameters in the PARAM.toml file, for instance `PlotVar` is
+not needed if `DoPlot=false`. How can I handle that?
+
 - [x] Analytical solution of shock tube tests
-- [ ] Convert into a package
+- [x] Convert into a package
 - [ ] GPU support
 - [ ] Implicit schemes
 - [ ] 2D/3D tests
 - [ ] MHD tests
+- [ ] LaTeX documentation
