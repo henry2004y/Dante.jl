@@ -1,0 +1,34 @@
+[Parameters]
+nD = 1			# Dimension of the system
+Scheme     = "HLLE"
+Order      = 2
+CFL        = 0.9
+limiter    = "MM"
+TimeAccurate = true
+UseConservative = true
+UseGPU     = false
+
+IC         = "Riemann"
+RiemannProblemType = 1
+
+nStep      = 100
+tEnd       = 0.1
+
+[Grid]
+TypeGrid   = "Cartesian"
+xyzMinMax  = [[0.0, 1.0]]
+nI = 101
+nJ = 1
+nK = 1
+BCtype = ["float","float"]
+
+
+[Plots]
+DoPlot = false
+PlotVar = "ux"
+PlotInterval = 25
+
+PlotType = [
+  "x",
+  "1D"
+]

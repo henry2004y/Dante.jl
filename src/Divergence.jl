@@ -5,6 +5,8 @@ export divergence!, divergence_ndgrid
 using ..Parameters: Param
 
 """
+	divergence_ndgrid!(hx, hy, hz, var, div)
+
 Generic divergence calculation.
 """
 function divergence_ndgrid!(hx::StepRangeLen,hy::StepRangeLen,hz::StepRangeLen,

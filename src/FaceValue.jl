@@ -85,6 +85,8 @@ function init_face_value(param::Param)
 end
 
 """
+	calc_face_value!(param, state_GV, faceState, faceGradient)
+
 Type instability for the return type is introduced, but it seems ok.
 I don't know how to modify faceState for views in 1st order.
 """
@@ -194,14 +196,14 @@ function calc_face_value!(param::Param, state_GV::Array{Float64,4},
 end
 
 """
-   minmod(a,b)
+	minmod(a,b)
 OUTPUT:
  m: zero if opposite sign, otherwise the one of smaller magnitude.
 """
 minmod(a::Float64,b::Float64) = (sign(a) + sign(b)) / 2.0 * min(abs(a), abs(b))
 
 """
-   minmod(a,b,c)
+	minmod(a,b,c)
 For three inputs, use Harten's generalized definition.
 OUTPUT:
  m: zero if opposite sign, otherwise the one of smaller magnitude.

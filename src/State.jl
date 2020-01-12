@@ -64,80 +64,83 @@ function set_init(param::Param)
 end
 
 """
-   set_init_Riemann(RiemannProblemType)
+	set_init_Riemann(RiemannProblemType, Verbose)
+
 Set the initial conditions of Riemann problems. Note that currently tEnd and CFL
 number can only be set in PARAM.toml, and cannot be changed afterwards.
 """
-function set_init_Riemann(RiemannProblemType::Int)
+function set_init_Riemann(RiemannProblemType::Int, Verbose=true)
 
    if RiemannProblemType == 1
-      println("Case 1: Sods problem")
+      Verbose && println("Case 1: Sods problem")
       p   = [1.0, 0.1]
       u   = [0.0, 0.0]
       rho = [1.0, 0.125]
       tEnd, CFL = 0.1, 0.9 # I need to think of how to set this!!!
    elseif RiemannProblemType == 2
-      println("Case 2: Left Expansion and right strong shock")
+      Verbose && println("Case 2: Left Expansion and right strong shock")
       p   = [1000.0, 0.1]
       u   = [0.0   , 0.0]
       rho = [3.0   , 2.0]
       tEnd, CFL = 0.02, 0.9
    elseif RiemannProblemType == 3
-      println("Case 3: Right Expansion and left strong shock")
+      Verbose && println("Case 3: Right Expansion and left strong shock")
       p   = [7.0, 10.0]
       u   = [0.0, 0.0 ]
       rho = [1.0, 1.0 ]
       tEnd, CFL = 0.1, 0.9
    elseif RiemannProblemType == 4
-      println("Case 4: Double Shock")
+      Verbose && println("Case 4: Double Shock")
       p   = [450.0, 45.0]
       u   = [20.0 , -6.0]
       rho = [6.0  ,  6.0]
       tEnd, CFL = 0.01, 0.90
    elseif RiemannProblemType == 5
-      println("Case 5: Double Expansion")
+      Verbose && println("Case 5: Double Expansion")
       p   = [40.0,  40.0]
       u   = [-2.0,  2.0 ]
       rho = [1.0 ,  2.5 ]
       tEnd, CFL = 0.03, 0.90
    elseif RiemannProblemType == 6
-      println("Case 6: Cavitation")
+      Verbose && println("Case 6: Cavitation")
       p   = [0.4 , 0.4]
       u   = [-2.0, 2.0]
       rho = [ 1.0, 1.0]
       tEnd, CFL = 0.1, 0.90
    elseif RiemannProblemType == 7
-      println("Shocktube problem of G.A. Sod, JCP 27:1, 1978")
+      Verbose && println("Shocktube problem of G.A. Sod, JCP 27:1, 1978")
       p   = [1.0 , 0.1  ]
       u   = [0.75, 0.0  ]
       rho = [1.0 , 0.125]
       tEnd, CFL = 0.17, 0.90
    elseif RiemannProblemType == 8
-      println("Lax test case: M. Arora and P.L. Roe: JCP 132:3-11, 1997")
+      Verbose &&
+         println("Lax test case: M. Arora and P.L. Roe: JCP 132:3-11, 1997")
       p   = [3.528, 0.571]
       u   = [0.698, 0    ]
       rho = [0.445, 0.5  ]
       tEnd, CFL = 0.15, 0.90
    elseif RiemannProblemType == 9
-      println("Mach = 3 test case: M. Arora and P.L. Roe: JCP 132:3-11, 1997")
+      Verbose &&
+         println("Mach = 3 test case: M. Arora and P.L. Roe: JCP 132:3-11, 1997")
       p   = [10.333,  1.0 ]
       u   = [ 0.92 ,  3.55]
       rho = [3.857 ,  1.0 ]
       tEnd, CFL = 0.09, 0.90
    elseif RiemannProblemType == 10
-      println("Shocktube problem with supersonic zone")
+      Verbose && println("Shocktube problem with supersonic zone")
       p   = [1.0,  0.02]
       u   = [0.0,  0.00]
       rho = [1.0,  0.02]
       tEnd, CFL = 0.162, 0.90
    elseif RiemannProblemType == 11
-      println("Contact discontinuity")
+      Verbose && println("Contact discontinuity")
       p   = [0.5, 0.5]
       u   = [0.0, 0.0]
       rho = [1.0, 0.6]
       tEnd, CFL = 1.0, 0.90
    elseif RiemannProblemType == 12
-      println("Stationary shock")
+      Verbose && println("Stationary shock")
       p   = [ 1.0,  0.1 ]
       u   = [-2.0, -2.0 ]
       rho = [ 1.0, 0.125]
@@ -146,14 +149,16 @@ function set_init_Riemann(RiemannProblemType::Int)
       error("RiemannProblemType not known!")
    end
    # Print for Riemann Problems
-   println("")
-   println("density (L): $(rho[1])")
-   println("velocity(L): $(u[1])")
-   println("Pressure(L): $(p[1])")
-   println("")
-   println("density (R): $(rho[2])")
-   println("velocity(R): $(u[2])")
-   println("Pressure(R): $(p[2])")
+   if Verbose
+      println("")
+      println("density (L): $(rho[1])")
+      println("velocity(L): $(u[1])")
+      println("Pressure(L): $(p[1])")
+      println("")
+      println("density (R): $(rho[2])")
+      println("velocity(R): $(u[2])")
+      println("Pressure(R): $(p[2])")
+   end
 
    return rho, u, p, tEnd, CFL
 end

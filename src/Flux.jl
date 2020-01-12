@@ -590,7 +590,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
    end
 end
 
-```Calculate the maximum speed in each direction.```
+"""Calculate the maximum speed in each direction."""
 function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
    nI, nJ, nK = param.nI, param.nJ, param.nK
    # Aliases
