@@ -4,9 +4,9 @@ export set_cell_boundary!
 
 using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
 
-function set_cell_boundary!(param::Param, state_GV::Array{Float64,4})
+function set_cell_boundary!(param::Param, state_GV)
 
-   nG = param.nG
+   nG, TypeBc = param.nG, param.TypeBc
    iMin, iMax, jMin, jMax, kMin, kMax =
    param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
    iMinAll, iMaxAll = param.iMinAll, param.iMaxAll
@@ -14,7 +14,7 @@ function set_cell_boundary!(param::Param, state_GV::Array{Float64,4})
    kMinAll, kMaxAll = param.kMinAll, param.kMaxAll
    nVar = param.nVar
 
-   for (iBc,TypeBc) in enumerate(param.TypeBc)
+   for (iBc,TypeBc) in enumerate(TypeBc)
       if TypeBc == "periodic"
          if iBc == 1
             @inbounds for iVar=1:nVar, k=kMin:kMax, j=jMin:jMax, i=1:nG
@@ -86,6 +86,7 @@ function set_cell_boundary!(param::Param, state_GV::Array{Float64,4})
       end
    end
 
+   return nothing
 end
 
 end

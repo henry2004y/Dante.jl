@@ -9,7 +9,7 @@ using ..Parameters: Param, Param3D, Rho_, Ux_, P_
 using ..State: set_init_Riemann
 
 """Plot 1D variables along a line."""
-function plotvar(param::Param, it::Int, state_GV::Array{Float64,4})
+function plotvar(param::Param, it, state_GV)
 
    # Now this only works for 1D x!
    iMin, iMax, jMin, jMax, kMin, kMax =
@@ -37,6 +37,8 @@ function plotvar(param::Param, it::Int, state_GV::Array{Float64,4})
 
    title("iStep=$(it)")
    legend(labels=[plotvar])
+
+   return nothing
 end
 
 """Plot the analytical solution of shock tube problem."""
@@ -57,7 +59,7 @@ function plot_Riemann_exact(param::Param)
       plot(xe, ue, "--")
    end
 
-   return
+   return nothing
 end
 
 end

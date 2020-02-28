@@ -69,7 +69,7 @@ end
 Set the initial conditions of Riemann problems. Note that currently tEnd and CFL
 number can only be set in PARAM.toml, and cannot be changed afterwards.
 """
-function set_init_Riemann(RiemannProblemType::Int, Verbose=true)
+function set_init_Riemann(RiemannProblemType, Verbose=true)
 
    if RiemannProblemType == 1
       Verbose && println("Case 1: Sods problem")
@@ -164,8 +164,8 @@ function set_init_Riemann(RiemannProblemType::Int, Verbose=true)
 end
 
 """Time-accurate version."""
-function update_state!(param::Param, state_GV::Array{Float64,4}, dt::Float64,
-   faceFlux::FaceFlux, source_GV::Array{Float64,4})
+function update_state!(param::Param, state_GV, dt::Float64,
+   faceFlux::FaceFlux, source_GV)
 
    Flux_XV = faceFlux.Flux_XV
    Flux_YV = faceFlux.Flux_YV
@@ -225,9 +225,9 @@ function update_state!(param::Param, state_GV::Array{Float64,4}, dt::Float64,
 
 end
 
-"""Local timestepping version. """
-function update_state!(param::Param, state_GV::Array{Float64,4},
-   dt::Array{Float64,3}, faceFlux::FaceFlux, source_GV::Array{Float64,4})
+"Local timestepping version."
+function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
+   source_GV)
 
    Flux_XV = faceFlux.Flux_XV
    Flux_YV = faceFlux.Flux_YV

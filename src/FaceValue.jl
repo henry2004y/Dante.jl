@@ -90,7 +90,7 @@ end
 Type instability for the return type is introduced, but it seems ok.
 I don't know how to modify faceState for views in 1st order.
 """
-function calc_face_value!(param::Param, state_GV::Array{Float64,4},
+function calc_face_value!(param::Param, state_GV,
    faceState::FaceState, faceGradient::FaceGradient)
 
    if param.Order == 1
@@ -196,19 +196,19 @@ function calc_face_value!(param::Param, state_GV::Array{Float64,4},
 end
 
 """
-	minmod(a,b)
+	minmod(a, b)
 OUTPUT:
  m: zero if opposite sign, otherwise the one of smaller magnitude.
 """
-minmod(a::Float64,b::Float64) = (sign(a) + sign(b)) / 2.0 * min(abs(a), abs(b))
+minmod(a, b) = (sign(a) + sign(b)) / 2.0 * min(abs(a), abs(b))
 
 """
-	minmod(a,b,c)
+	minmod(a, b, c)
 For three inputs, use Harten's generalized definition.
 OUTPUT:
  m: zero if opposite sign, otherwise the one of smaller magnitude.
 """
-function minmod(a::Float64,b::Float64,c::Float64)
+function minmod(a, b, c)
    s = (sign(a) + sign(b) + sign(c))/3.0
    if abs(s) == 1
       m = s*min(abs(a),abs(b),abs(c))

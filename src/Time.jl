@@ -11,8 +11,7 @@ function init_timestep(param::Param)
    time_G = Array{Float64,3}(undef,nI,nJ,nK)
 end
 
-function calc_timestep!(param::Param, speedFlux::SpeedFlux,
-   time_G::Array{Float64,3})::Float64
+function calc_timestep!(param::Param, speedFlux::SpeedFlux, time_G)::Float64
 
    CFL = param.CFL
    CellSize_D = param.CellSize_D

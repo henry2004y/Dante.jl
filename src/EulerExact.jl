@@ -22,8 +22,7 @@ A Cavitation Check is incorporated in the code. It further prevents plotting for
 Coded by Manuel Diaz, IAM, NTU 03/09/2011.
 Modified by Hongyang Zhou from Matlab to Julia, 11/05/2019
 """
-function EulerExact(ρ1::Float64, u1::Float64, p1::Float64,
-   ρ4::Float64, u4::Float64, p4::Float64, tEnd::Float64, n::Int)
+function EulerExact(ρ1, u1, p1, ρ4, u4, p4, tEnd, n)
 
    # Gamma values
    γ=(n+2)/n; α=(γ+1)/(γ-1)
@@ -104,9 +103,7 @@ function EulerExact(ρ1::Float64, u1::Float64, p1::Float64,
 end
 
 # Vector x version
-function EulerExact(ρ1::Float64, u1::Float64, p1::Float64,
-   ρ4::Float64, u4::Float64, p4::Float64, tEnd::Float64, n::Int,
-	x::StepRangeLen{Float64})
+function EulerExact(ρ1, u1, p1, ρ4, u4, p4, tEnd, n, x)
 
    # Gamma values
    γ=(n+2)/n; α=(γ+1)/(γ-1)

@@ -590,7 +590,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
    end
 end
 
-"""Calculate the maximum speed in each direction."""
+"Calculate the maximum speed in each direction."
 function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
    nI, nJ, nK = param.nI, param.nJ, param.nK
    # Aliases
@@ -602,7 +602,7 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
    Cmax_YF = speedFlux.Cmax_YF
    Cmax_ZF = speedFlux.Cmax_ZF
 
-   for k = 1:nK, j = 1:nJ, i = 1:nI+1
+   @inbounds for k = 1:nK, j = 1:nJ, i = 1:nI+1
       Cs2_XF = γ*(LS_XV[i,j,k,P_] + RS_XV[i,j,k,P_]) /
          (LS_XV[i,j,k,Rho_] + RS_XV[i,j,k,Rho_])
       Ca2_XF = ( (LS_XV[i,j,k,Bx_] + RS_XV[i,j,k,Bx_])^2 +
@@ -616,7 +616,7 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
          sqrt((Cs2_XF + Ca2_XF)^2 - 4.0*Cs2_XF*Can2_XF)) )
    end
 
-   for k = 1:nK, j = 1:nJ+1, i = 1:nI
+   @inbounds for k = 1:nK, j = 1:nJ+1, i = 1:nI
       Cs2_YF = γ*(LS_YV[i,j,k,P_] + RS_YV[i,j,k,P_]) /
          (LS_YV[i,j,k,Rho_] + RS_YV[i,j,k,Rho_])
       Ca2_YF = ( (LS_YV[i,j,k,Bx_] + RS_YV[i,j,k,Bx_])^2 +
@@ -630,7 +630,7 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
          sqrt((Cs2_YF + Ca2_YF)^2 - 4.0*Cs2_YF*Can2_YF)) )
    end
 
-   for k = 1:nK+1, j = 1:nJ, i = 1:nI
+   @inbounds for k = 1:nK+1, j = 1:nJ, i = 1:nI
       Cs2_ZF = γ*(LS_ZV[i,j,k,P_] + RS_ZV[i,j,k,P_]) /
          (LS_ZV[i,j,k,Rho_] + RS_ZV[i,j,k,Rho_])
       Ca2_ZF = ( (LS_ZV[i,j,k,Bx_] + RS_ZV[i,j,k,Bx_])^2 +
@@ -664,7 +664,7 @@ function get_speed_maxmin!(param::Param, faceValue::FaceState,
    # There must be better ways to do this: LS_XV and RS_XV is just a shift of state_GV,
    # so some repetitive calculation can be avoided!
 
-   for k = 1:nK, j = 1:nJ, i = 1:nI+1
+   @inbounds for k = 1:nK, j = 1:nJ, i = 1:nI+1
       Cs2_LXF = γ*LS_XV[i,j,k,P_]/LS_XV[i,j,k,Rho_]
       Ca2_LXF = (LS_XV[i,j,k,Bx_]^2 + LS_XV[i,j,k,By_]^2 + LS_XV[i,j,k,Bz_]^2) /
          LS_XV[i,j,k,Rho_]
@@ -685,7 +685,7 @@ function get_speed_maxmin!(param::Param, faceValue::FaceState,
       Cmin_XF[i,j,k] = min(0, u_LXF-c_LXF, u_RXF-c_RXF)
    end
 
-   for k = 1:nK, j = 1:nJ+1, i = 1:nI
+   @inbounds for k = 1:nK, j = 1:nJ+1, i = 1:nI
       Cs2_LYF = γ*LS_YV[i,j,k,P_]/LS_YV[i,j,k,Rho_]
       Ca2_LYF = (LS_YV[i,j,k,Bx_]^2 + LS_YV[i,j,k,By_]^2 + LS_YV[i,j,k,Bz_]^2) /
          LS_YV[i,j,k,Rho_]
@@ -706,7 +706,7 @@ function get_speed_maxmin!(param::Param, faceValue::FaceState,
       Cmin_YF[i,j,k] = min(0, u_LYF-c_LYF, u_RYF-c_RYF)
    end
 
-   for k = 1:nK+1, j = 1:nJ, i = 1:nI
+   @inbounds for k = 1:nK+1, j = 1:nJ, i = 1:nI
       Cs2_LZF = γ*LS_ZV[i,j,k,P_]/LS_ZV[i,j,k,Rho_]
       Ca2_LZF = (LS_ZV[i,j,k,Bx_]^2 + LS_ZV[i,j,k,By_]^2 + LS_ZV[i,j,k,Bz_]^2) /
          LS_ZV[i,j,k,Rho_]

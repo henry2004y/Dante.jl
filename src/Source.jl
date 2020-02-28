@@ -21,8 +21,7 @@ function init_source(param::Param)
    return source_GV, div
 end
 
-function calc_source!(param::Param, state_GV::Array{Float64,4},
-   source_GV::Array{Float64,4}, div::Div)
+function calc_source!(param::Param, state_GV, source_GV, div::Div)
 
    nVar, nG = param.nVar, param.nG
    x, y, z = param.x, param.y, param.z

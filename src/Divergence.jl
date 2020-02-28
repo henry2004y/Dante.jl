@@ -50,20 +50,20 @@ function divergence_ndgrid(hx::StepRangeLen,hy::StepRangeLen,hz::StepRangeLen,
    return div
 end
 
-function compute_px(siz,px,n,hx,var)
-   @inbounds for i=1:n-2, j=1:siz[2], k=1:siz[3]
+function compute_px(siz, px, n, hx, var)
+   @inbounds for i = 1:n-2, j = 1:siz[2], k = 1:siz[3]
          px[i+1,j,k] = (var[i+2,j,k,1] - var[i,j,k,1])/(hx[i+2] - hx[i])
    end
 end
 
-function compute_qy(siz,qy,n,hy,var)
-   @inbounds for i=1:siz[1], j=1:n-2, k=1:siz[3]
+function compute_qy(siz, qy, n, hy, var)
+   @inbounds for i = 1:siz[1], j = 1:n-2, k = 1:siz[3]
          qy[i,j+1,k] = (var[i,j+2,k,2] - var[i,j,k,2])/(hy[i+2] - hy[i])
    end
 end
 
-function compute_rz(siz,rz,n,hz,var)
-   @inbounds for i=1:siz[1], j=1:siz[2], k=1:n-2
+function compute_rz(siz, rz, n, hz, var)
+   @inbounds for i = 1:siz[1], j = 1:siz[2], k = 1:n-2
          rz[i,j,k+1] = (var[i,j,k+2,3] - var[i,j,k,3])/(hz[i+2] - hz[i])
    end
 end
@@ -88,21 +88,21 @@ function divergence!(param::Param, var::SubArray{Float64,4,Array{Float64,4},
    # Right now do nothing for the ghost cells maybe needed later!
    # Take central differences on interior points
    if nI > 1
-      for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+      for k = kMin:kMax, j = jMin:jMax, i = iMin:iMax
          div[i-nG,j-nG,k-nG] += (var[i+1,j,k,1] - var[i-1,j,k,1])/
             (x[i+1] - x[i-1])
       end
    end
 
    if nJ > 1
-      for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+      for k = kMin:kMax, j = jMin:jMax, i = iMin:iMax
          div[i-nG,j-nG,k-nG] += (var[i,j+1,k,2] - var[i,j-1,k,2])/
             (y[i+1] - y[i-1])
       end
    end
 
    if nK > 1
-      for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+      for k = kMin:kMax, j = jMin:jMax, i = iMin:iMax
          div[i-nG,j-nG,k-nG] += (var[i,j,k+1,3] - var[i,j,k-1,3])/
             (z[i+1] - z[i-1])
       end
@@ -120,21 +120,21 @@ function divergence!(param::Param, var::Array{Float64,4}, div::Array{Float64,3})
    # Right now do nothing for the ghost cells maybe needed later!
    # Take central differences on interior points
    if nI > 1
-      for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+      for k = kMin:kMax, j = jMin:jMax, i = iMin:iMax
          div[i-nG,j-nG,k-nG] += (var[i+1,j,k,1] - var[i-1,j,k,1])/
             (x[i+1] - x[i-1])
       end
    end
 
    if nJ > 1
-      for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+      for k = kMin:kMax, j = jMin:jMax, i = iMin:iMax
          div[i-nG,j-nG,k-nG] += (var[i,j+1,k,2] - var[i,j-1,k,2])/
             (y[i+1] - y[i-1])
       end
    end
 
    if nK > 1
-      for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+      for k = kMin:kMax, j = jMin:jMax, i = iMin:iMax
          div[i-nG,j-nG,k-nG] += (var[i,j,k+1,3] - var[i,j,k-1,3])/
             (z[i+1] - z[i-1])
       end

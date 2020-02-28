@@ -4,7 +4,7 @@ export Param, setParameters
 export Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
 export γ
 
-using Pkg.TOML
+using Pkg.TOML # This should be replaced by a stand-alone TOML package!
 
 abstract type Param end
 
