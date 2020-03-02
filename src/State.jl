@@ -5,7 +5,7 @@ export set_init, set_init_Riemann, update_state!
 using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
 using ..Parameters: γ
 using ..Flux: FaceFlux
-
+include("Utility.jl")
 
 function set_init(param::Param)
 
@@ -188,9 +188,8 @@ function update_state!(param::Param, state_GV, dt::Float64,
          end
       else
          @inbounds for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
-            u = state_GV[i,j,k,Ux_]^2 + state_GV[i,j,k,Uy_]^2 +
-               state_GV[i,j,k,Uz_]^2
-            b = state_GV[i,j,k,Bx_] + state_GV[i,j,k,By_] + state_GV[i,j,k,Bz_]
+            u = □(state_GV[i,j,k,Ux_], state_GV[i,j,k,Uy_], state_GV[i,j,k,Uz_])
+            b = □(state_GV[i,j,k,Bx_], state_GV[i,j,k,By_], state_GV[i,j,k,Bz_])
 
             state_GV[i,j,k,E_] = state_GV[i,j,k,P_]/(γ-1.0) +
                0.5/state_GV[i,j,k,Rho_]*u + 0.5*b
@@ -204,10 +203,12 @@ function update_state!(param::Param, state_GV, dt::Float64,
          end
 
          @inbounds for k=1:nK, j=1:nJ, i=1:nI
-            u = state_GV[i+nG,j+nG,k+nG,Ux_]^2 + state_GV[i+nG,j+nG,k+nG,Uy_]^2 +
-               state_GV[i+nG,j+nG,k+nG,Uz_]^2
-            b = state_GV[i+nG,j+nG,k+nG,Bx_]^2 + state_GV[i+nG,j+nG,k+nG,By_]^2 +
-               state_GV[i+nG,j+nG,k+nG,Bz_]^2
+            u = □(state_GV[i+nG,j+nG,k+nG,Ux_],
+               state_GV[i+nG,j+nG,k+nG,Uy_],
+               state_GV[i+nG,j+nG,k+nG,Uz_])
+            b = □(state_GV[i+nG,j+nG,k+nG,Bx_],
+               state_GV[i+nG,j+nG,k+nG,By_],
+               state_GV[i+nG,j+nG,k+nG,Bz_])
 
             state_GV[i+nG,j+nG,k+nG,E_] -= dt*(-source_GV[i,j,k,E_] +
                (Flux_XV[i+1,j,k,E_] - Flux_XV[i,j,k,E_])/CellSize_D[1] +
@@ -250,9 +251,8 @@ function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
          end
       else
          @inbounds for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
-            u = state_GV[i,j,k,Ux_]^2 + state_GV[i,j,k,Uy_]^2 +
-               state_GV[i,j,k,Uz_]^2
-            b = state_GV[i,j,k,Bx_] + state_GV[i,j,k,By_] + state_GV[i,j,k,Bz_]
+            u = □(state_GV[i,j,k,Ux_], state_GV[i,j,k,Uy_], state_GV[i,j,k,Uz_])
+            b = □(state_GV[i,j,k,Bx_], state_GV[i,j,k,By_], state_GV[i,j,k,Bz_])
 
             state_GV[i,j,k,E_] = state_GV[i,j,k,P_]/(γ-1.0) +
                0.5/state_GV[i,j,k,Rho_]*u + 0.5*b
@@ -266,10 +266,12 @@ function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
          end
 
          @inbounds for k=1:nK, j=1:nJ, i=1:nI
-            u = state_GV[i+nG,j+nG,k+nG,Ux_]^2 + state_GV[i+nG,j+nG,k+nG,Uy_]^2 +
-               state_GV[i+nG,j+nG,k+nG,Uz_]^2
-            b = state_GV[i+nG,j+nG,k+nG,Bx_]^2 + state_GV[i+nG,j+nG,k+nG,By_]^2 +
-               state_GV[i+nG,j+nG,k+nG,Bz_]^2
+            u = □(state_GV[i+nG,j+nG,k+nG,Ux_],
+               state_GV[i+nG,j+nG,k+nG,Uy_],
+               state_GV[i+nG,j+nG,k+nG,Uz_])
+            b = □(state_GV[i+nG,j+nG,k+nG,Bx_],
+               state_GV[i+nG,j+nG,k+nG,By_],
+               state_GV[i+nG,j+nG,k+nG,Bz_])
 
             state_GV[i+nG,j+nG,k+nG,E_] -= dt[i,j,k]*(-source_GV[i,j,k,E_] +
                (Flux_XV[i+1,j,k,E_] - Flux_XV[i,j,k,E_])/CellSize_D[1] +
