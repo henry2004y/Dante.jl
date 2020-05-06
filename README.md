@@ -56,6 +56,11 @@ Finite volume MHD simulation with structured mesh. This is rewritten from the MA
 * PlotType: type of plots
   * ["x", "1D"]
 
+## Benchmark
+
+Riemann test 1 without plotting:
+9.001 ms (1182 allocations: 8.50 MiB)
+
 ## Issues
 
 Learn from other packages and improve!
@@ -76,7 +81,9 @@ However, considering that this code is mainly developed for 3D, the current styl
 
 If there are small arrays inside functions, consider using static arrays.
 
-To speedup the loop performance, we need @inbounds, @simd, or the latest @avx from the LoopVectorization.jl package.
+To speedup the loop performance, we need `@inbounds`, `@simd`, or the latest `@avx` from the `LoopVectorization.jl` package.
+
+I noticed a significant increase in compile time when I replace all the `@inbounds`, `@simd` with `@avx`.
 
 @fastmath is another thing worth trying.
 
@@ -88,6 +95,7 @@ not needed if `DoPlot=false`. How can I handle that?
 - [x] Analytical solution of shock tube tests
 - [x] Convert into a package
 - [x] Change U_ to M_ to clarify momentum from velocity
+- [ ] Remove the multi-module structure
 - [ ] Change TOML dependency
 - [ ] GPU support
 - [ ] Implicit schemes

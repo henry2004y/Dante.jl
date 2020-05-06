@@ -2,6 +2,8 @@ module FaceValue
 
 export calc_face_value!, init_face_value, FaceState, FaceGradient
 
+using LoopVectorization
+
 using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
 
 abstract type FaceState end
@@ -166,27 +168,27 @@ function calc_face_value!(param::Param, state_GV,
       end
 
       # Linear interpolation onto edge centers
-      @inbounds for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
+      @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
          LState_XV[i,j,k,iVar] = state_GV[i+nG-1,j+nG,k+nG,iVar] +
             0.5*dq_X[i,j,k,iVar]
       end
-      @inbounds for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
+      @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
          RState_XV[i,j,k,iVar] = state_GV[i+nG,j+nG,k+nG,iVar] -
             0.5*dq_X[i+1,j,k,iVar]
       end
-      @inbounds for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
+      @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
          LState_YV[i,j,k,iVar] = state_GV[i+nG,j+nG-1,k+nG,iVar] +
             0.5*dq_Y[i,j,k,iVar]
       end
-      @inbounds for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
+      @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
          RState_YV[i,j,k,iVar] = state_GV[i+nG,j+nG,k+nG,iVar] -
             0.5*dq_Y[i,j+1,k,iVar]
       end
-      @inbounds for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
+      @avx for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
          LState_ZV[i,j,k,iVar] = state_GV[i+nG,j+nG,k+nG-1,iVar] +
             0.5*dq_Z[i,j,k,iVar]
       end
-      @inbounds for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
+      @avx for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
          RState_ZV[i,j,k,iVar] = state_GV[i+nG,j+nG,k+nG,iVar] -
             0.5*dq_Z[i,j,k+1,iVar]
       end
