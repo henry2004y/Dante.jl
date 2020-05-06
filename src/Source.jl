@@ -2,8 +2,8 @@ module Source
 
 export calc_source!, init_source, Div
 
-using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
-using ..Parameters: γ
+using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Mx_, My_, Mz_, Bx_, By_, Bz_
+using ..Parameters: P_, E_, U_, M_, B_, γ
 using ..Divergence: divergence!
 
 struct Div{T<:AbstractFloat}
@@ -11,17 +11,19 @@ struct Div{T<:AbstractFloat}
 end
 
 function init_source(param::Param)
-   GridSize = param.GridSize
+   GridSize, FullSize = param.GridSize, param.FullSize
    nVar = param.nVar
    source_GV = Array{Float64,4}(undef, GridSize..., nVar)
    div_G = Array{Float64,3}(undef, GridSize...)
 
    div = Div(div_G)
 
-   return source_GV, div
+   U = Array{Float64,4}(undef, FullSize..., 3)
+
+   return source_GV, U, div
 end
 
-function calc_source!(param::Param, state_GV, source_GV, div::Div)
+function calc_source!(param::Param, state_GV, source_GV, U, div::Div)
 
    nVar, nG = param.nVar, param.nG
    x, y, z = param.x, param.y, param.z
@@ -40,16 +42,16 @@ function calc_source!(param::Param, state_GV, source_GV, div::Div)
    source_GV[:,:,:,Rho_] .= 0.0
 
    @inbounds for k = 1:nK, j = 1:nJ, i = 1:nI
-      source_GV[i,j,k,Ux_] = -state_GV[i+nG,j+nG,k+nG,Bx_]*div_G[i,j,k]
-      source_GV[i,j,k,Uy_] = -state_GV[i+nG,j+nG,k+nG,By_]*div_G[i,j,k]
-      source_GV[i,j,k,Uz_] = -state_GV[i+nG,j+nG,k+nG,Bz_]*div_G[i,j,k]
+      source_GV[i,j,k,Mx_] = -state_GV[i+nG,j+nG,k+nG,Bx_]*div_G[i,j,k]
+      source_GV[i,j,k,My_] = -state_GV[i+nG,j+nG,k+nG,By_]*div_G[i,j,k]
+      source_GV[i,j,k,Mz_] = -state_GV[i+nG,j+nG,k+nG,Bz_]*div_G[i,j,k]
       source_GV[i,j,k,Bx_] =  state_GV[i+nG,j+nG,k+nG,Ux_]*div_G[i,j,k]
       source_GV[i,j,k,By_] =  state_GV[i+nG,j+nG,k+nG,Uy_]*div_G[i,j,k]
       source_GV[i,j,k,Bz_] =  state_GV[i+nG,j+nG,k+nG,Uz_]*div_G[i,j,k]
    end
 
    # Calculate divergence of U
-   U = state_GV[:,:,:,U_]./state_GV[:,:,:,Rho_] # This costs memory, but ...
+   U = state_GV[:,:,:,M_]./state_GV[:,:,:,Rho_] # This costs memory, but ...
    divergence!(param, U, div_G)
 
    if !param.UseConservative

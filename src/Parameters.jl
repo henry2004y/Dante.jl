@@ -1,7 +1,7 @@
 module Parameters
 
 export Param, setParameters
-export Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
+export Rho_, Ux_, Uy_, Uz_, Mx_, My_, Mz_, Bx_, By_, Bz_, P_, E_, U_, M_, B_
 export γ
 
 using Pkg.TOML # This should be replaced by a stand-alone TOML package!
@@ -12,12 +12,16 @@ const Rho_       = 1
 const Ux_        = 2
 const Uy_        = 3
 const Uz_        = 4
+const Mx_        = 2
+const My_        = 3
+const Mz_        = 4
 const Bx_        = 5
 const By_        = 6
 const Bz_        = 7
 const P_         = 8
 const E_         = P_
 const U_         = Ux_:Uz_
+const M_         = Mx_:Mz_
 const B_         = Bx_:Bz_
 
 const γ = 5.0/3.0

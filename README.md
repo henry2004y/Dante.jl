@@ -76,6 +76,8 @@ However, considering that this code is mainly developed for 3D, the current styl
 
 If there are small arrays inside functions, consider using static arrays.
 
+To speedup the loop performance, we need @inbounds, @simd, or the latest @avx from the LoopVectorization.jl package.
+
 @fastmath is another thing worth trying.
 
 Do I need a general divergence calculation function? Or it can be specialized to my grid size?
@@ -85,6 +87,7 @@ not needed if `DoPlot=false`. How can I handle that?
 
 - [x] Analytical solution of shock tube tests
 - [x] Convert into a package
+- [x] Change U_ to M_ to clarify momentum from velocity
 - [ ] Change TOML dependency
 - [ ] GPU support
 - [ ] Implicit schemes

@@ -5,7 +5,7 @@ function advance!(param, state_GV)
 
 	faceFluxLR, faceFlux, speedFlux = init_flux(param)
 
-	source_GV, div = init_source(param)
+	source_GV, U, div = init_source(param)
 
 	time_G = init_timestep(param)
 
@@ -26,7 +26,7 @@ function advance!(param, state_GV)
 				calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
 				# Calculate source
-				calc_source!(param, state_GV, source_GV, div)
+				calc_source!(param, state_GV, source_GV, U, div)
 
 				# Calculate time step
 				dt = calc_timestep!(param, speedFlux, time_G)
@@ -59,7 +59,7 @@ function advance!(param, state_GV)
 				calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
 				# Calculate source
-				calc_source!(param, state_GV, source_GV, div)
+				calc_source!(param, state_GV, source_GV, U, div)
 
 				# Calculate time step
 				dt = calc_timestep!(param, speedFlux, time_G)
@@ -81,7 +81,7 @@ function advance!(param, state_GV)
 				calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
 				# Calculate source
-				calc_source!(param, state1_GV, source_GV, div)
+				calc_source!(param, state1_GV, source_GV, U, div)
 
 				# Update state
 				dt *= 2.0
@@ -114,7 +114,7 @@ function advance!(param, state_GV)
 				calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
 				# Calculate source
-				calc_source!(param, state_GV, source_GV, div)
+				calc_source!(param, state_GV, source_GV, U, div)
 
 				# Calculate time step
 				calc_timestep!(param, speedFlux, time_G)
@@ -142,7 +142,7 @@ function advance!(param, state_GV)
 				calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
 				# Calculate source
-				calc_source!(param, state_GV, source_GV, div)
+				calc_source!(param, state_GV, source_GV, U, div)
 
 				# Calculate time step
 				calc_timestep!(param, speedFlux, time_G)
@@ -164,7 +164,7 @@ function advance!(param, state_GV)
 				calc_face_flux!(param, faceState, faceFlux, speedFlux, faceFluxLR)
 
 				# Calculate source
-				calc_source!(param, state1_GV, source_GV, div)
+				calc_source!(param, state1_GV, source_GV, U, div)
 
 				# Update state
 				time_G *= 2.0
