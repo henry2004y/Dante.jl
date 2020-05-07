@@ -5,15 +5,15 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "b9de8dc6106e09c79f3f776c27c62360d30e5eb8"
+git-tree-sha1 = "c73d9cfc2a9d8433dc77f5bff4bddf46b1d78c20"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.9.1"
+version = "0.10.3"
 
 [[Colors]]
-deps = ["ColorTypes", "FixedPointNumbers", "InteractiveUtils", "Printf", "Reexport"]
-git-tree-sha1 = "177d8b959d3c103a6d57574c38ee79c81059c31b"
+deps = ["ColorTypes", "FixedPointNumbers", "InteractiveUtils", "Reexport"]
+git-tree-sha1 = "2fdeb981ebcf52cd800ddb6a0aa5eac34153552d"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
-version = "0.11.2"
+version = "0.12.0"
 
 [[Conda]]
 deps = ["JSON", "VersionParsing"]
@@ -21,11 +21,11 @@ git-tree-sha1 = "7a58bb32ce5d85f8bf7559aa7c2842f9aecf52fc"
 uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 version = "1.4.1"
 
-[[DataStructures]]
-deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "5a431d46abf2ef2a4d5d00bd0ae61f651cf854c8"
-uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.10"
+[[CpuId]]
+deps = ["Markdown", "Test"]
+git-tree-sha1 = "f0464e499ab9973b43c20f8216d088b61fda80c6"
+uuid = "adafc99b-e345-5852-983c-f28acb93d879"
+version = "0.2.2"
 
 [[Dates]]
 deps = ["Printf"]
@@ -35,10 +35,16 @@ uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
+[[DocStringExtensions]]
+deps = ["LibGit2", "Markdown", "Pkg", "Test"]
+git-tree-sha1 = "88bb0edb352b16608036faadcc071adda068582a"
+uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+version = "0.8.1"
+
 [[FixedPointNumbers]]
-git-tree-sha1 = "4aaea64dd0c30ad79037084f8ca2b94348e65eaa"
+git-tree-sha1 = "3ba9ea634d4c8b289d590403b4a06f8e227a6238"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
-version = "0.7.1"
+version = "0.8.0"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -56,6 +62,7 @@ uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 version = "1.1.0"
 
 [[LibGit2]]
+deps = ["Printf"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
 [[Libdl]]
@@ -68,11 +75,17 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
+[[LoopVectorization]]
+deps = ["DocStringExtensions", "LinearAlgebra", "OffsetArrays", "SIMDPirates", "SLEEFPirates", "UnPack", "VectorizationBase"]
+git-tree-sha1 = "71ce43b0fc870ade8bd0cf187b29069ee093d85b"
+uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
+version = "0.7.6"
+
 [[MacroTools]]
-deps = ["DataStructures", "Markdown", "Random"]
-git-tree-sha1 = "07ee65e03e28ca88bc9a338a3726ae0c3efaa94b"
+deps = ["Markdown", "Random"]
+git-tree-sha1 = "f7d2e3f654af75f01ec49be82c231c382214223a"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.4"
+version = "0.5.5"
 
 [[Markdown]]
 deps = ["Base64"]
@@ -81,20 +94,19 @@ uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
-[[OrderedCollections]]
-deps = ["Random", "Serialization", "Test"]
-git-tree-sha1 = "c4c13474d23c60d20a67b217f1d7f22a40edf8f1"
-uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.1.0"
+[[OffsetArrays]]
+git-tree-sha1 = "930db8ef90483570107f2396b1ffc6680f08e8b7"
+uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
+version = "1.0.4"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "d112c19ccca00924d5d3a38b11ae2b4b268dda39"
+git-tree-sha1 = "72c3451932513427caffbd8bab15643ad693804b"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "0.3.11"
+version = "1.0.3"
 
 [[Pkg]]
-deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Test", "UUIDs"]
+deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[Printf]]
@@ -103,15 +115,15 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[PyCall]]
 deps = ["Conda", "Dates", "Libdl", "LinearAlgebra", "MacroTools", "Serialization", "VersionParsing"]
-git-tree-sha1 = "ce0780857d129208c4e5a6d722486fb40ce11bf8"
+git-tree-sha1 = "3a3fdb9000d35958c9ba2323ca7c4958901f115d"
 uuid = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-version = "1.91.3"
+version = "1.91.4"
 
 [[PyPlot]]
 deps = ["Colors", "LaTeXStrings", "PyCall", "Sockets", "Test", "VersionParsing"]
-git-tree-sha1 = "ccecc72cf5b41a5de686bd76999040050a8a3472"
+git-tree-sha1 = "67dde2482fe1a72ef62ed93f8c239f947638e5a2"
 uuid = "d330b81b-6aea-500a-939a-2ce795aea3ee"
-version = "2.8.2"
+version = "2.9.0"
 
 [[REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets"]
@@ -129,12 +141,24 @@ version = "0.2.0"
 
 [[Roots]]
 deps = ["Printf"]
-git-tree-sha1 = "dcc013908465ca1019b34b4bf547b6a187d195f9"
+git-tree-sha1 = "955ce06c1f424ca7043c7827f5cb14d8eb397065"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "0.8.4"
+version = "1.0.1"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+
+[[SIMDPirates]]
+deps = ["VectorizationBase"]
+git-tree-sha1 = "d1bad12768aa00a9afa7ffe47d90d672d726dc0d"
+uuid = "21efa798-c60a-11e8-04d3-e1a92915a26a"
+version = "0.7.18"
+
+[[SLEEFPirates]]
+deps = ["Libdl", "SIMDPirates", "VectorizationBase"]
+git-tree-sha1 = "3e92bfb614a647e169379d79a28b63d7959064f0"
+uuid = "476501e8-09a2-5ece-8869-fb82de89a1fa"
+version = "0.4.7"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -150,8 +174,19 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
+[[UnPack]]
+git-tree-sha1 = "e0cb9715adda456f7657e45377fd3063bf87179a"
+uuid = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
+version = "0.1.0"
+
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[VectorizationBase]]
+deps = ["CpuId", "LinearAlgebra"]
+git-tree-sha1 = "3c6c0c2c0e47cefca059169df1a9fbf57c53e4a9"
+uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
+version = "0.11.2"
 
 [[VersionParsing]]
 git-tree-sha1 = "80229be1f670524750d905f8fc8148e5a8c4537f"
