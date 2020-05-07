@@ -124,21 +124,21 @@ function calc_face_value!(param::Param, state_GV,
       if param.limiter == "MC"
          # Find dq_j = minmod{fwd diff, bwd diff, cntrl diff}
 
-         @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI+2
+         @avx for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI+2
             dqR_X = state_GV[i+2,j+nG,k+nG,iVar] - state_GV[i+1,j+nG,k+nG,iVar]
             dqL_X = state_GV[i+1,j+nG,k+nG,iVar] - state_GV[i,j+nG,k+nG,iVar]
             dqC_X = state_GV[i+2,j+nG,k+nG,iVar] - state_GV[i,j+nG,k+nG,iVar]
             dq_X[i,j,k,iVar] = minmod(dqR_X, dqL_X, dqC_X)
          end
 
-         @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ+2, i=1:nI
+         @avx for iVar=1:nVar, k=1:nK, j=1:nJ+2, i=1:nI
             dqR_Y = state_GV[i+nG,j+2,k+nG,iVar] - state_GV[i+nG,j+1,k+nG,iVar]
             dqL_Y = state_GV[i+nG,j+1,k+nG,iVar] - state_GV[i+nG,j,k+nG,iVar]
             dqC_Y = state_GV[i+nG,j+2,k+nG,iVar] - state_GV[i+nG,j,k+nG,iVar]
             dq_Y[i,j,k,iVar] = minmod(dqR_Y, dqL_Y, dqC_Y)
          end
 
-         @inbounds for iVar=1:nVar, k=1:nK+2, j=1:nJ, i=1:nI
+         @avx for iVar=1:nVar, k=1:nK+2, j=1:nJ, i=1:nI
             dqR_Z = state_GV[i+nG,j+nG,k+2,iVar] - state_GV[i+nG,j+nG,k+1,iVar]
             dqL_Z = state_GV[i+nG,j+nG,k+1,iVar] - state_GV[i+nG,j+nG,k,iVar]
             dqC_Y = state_GV[i+nG,j+nG,k+2,iVar] - state_GV[i+nG,j+nG,k,iVar]
@@ -148,19 +148,19 @@ function calc_face_value!(param::Param, state_GV,
       elseif param.limiter == "MM" # Minmod limiter
          # Find dq_j = minmod{fwd diff, bwd diff}
 
-         @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI+2
+         @avx for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI+2
             dqR_X = state_GV[i+2,j+nG,k+nG,iVar] - state_GV[i+1,j+nG,k+nG,iVar]
             dqL_X = state_GV[i+1,j+nG,k+nG,iVar] - state_GV[i,j+nG,k+nG,iVar]
             dq_X[i,j,k,iVar] = minmod(dqR_X, dqL_X)
          end
 
-         @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ+2, i=1:nI
+         @avx for iVar=1:nVar, k=1:nK, j=1:nJ+2, i=1:nI
             dqR_Y = state_GV[i+nG,j+2,k+nG,iVar] - state_GV[i+nG,j+1,k+nG,iVar]
             dqL_Y = state_GV[i+nG,j+1,k+nG,iVar] - state_GV[i+nG,j,k+nG,iVar]
             dq_Y[i,j,k,iVar] = minmod(dqR_Y, dqL_Y)
          end
 
-         @inbounds for iVar=1:nVar, k=1:nK+2, j=1:nJ, i=1:nI
+         @avx for iVar=1:nVar, k=1:nK+2, j=1:nJ, i=1:nI
             dqR_Z = state_GV[i+nG,j+nG,k+2,iVar] - state_GV[i+nG,j+nG,k+1,iVar]
             dqL_Z = state_GV[i+nG,j+nG,k+1,iVar] - state_GV[i+nG,j+nG,k,iVar]
             dq_Z[i,j,k,iVar] = minmod(dqR_Z, dqL_Z)
