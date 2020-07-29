@@ -65,27 +65,29 @@ Riemann test 1 without plotting:
 
 Learn from other packages and improve!
 
-`x^2` is much slower than `x*x`! However, within a function the Julia compiler knows how to optimize the square. For better readability, I need to create some inline function for this operation.
+* `x^2` is much slower than `x*x`! However, within a function the Julia compiler knows how to optimize the square. For better readability, I need to create some inline function for this operation.
 
-One issue I encountered is using @view for face values. This greatly slows down the flux calculations because of heap allocated memories. As suggested by Roger on Julia's Chinese forum, one workaround is to use the unsafeArrays.jl package to allocate @view memory on the stack. This is worth trying because for the current implementation, LState_XV and RState_XV are just shifts of the original array State_GV. Ideally there is no need to copy the data: using pointers/views should be enough.
+* One issue I encountered is using @view for face values. This greatly slows down the flux calculations because of heap allocated memories. As suggested by Roger on Julia's Chinese forum, one workaround is to use the unsafeArrays.jl package to allocate @view memory on the stack. This is worth trying because for the current implementation, LState_XV and RState_XV are just shifts of the original array State_GV. Ideally there is no need to copy the data: using pointers/views should be enough.
 
-Let me create a simple scenario to deal with the problem and find out a solution. The package UNsafeArray.jl is worth trying.
+Let me create a simple scenario to deal with the problem and find out a solution. The package `UNsafeArray.jl` is worth trying.
 
-My test shows that using SubArrays inside for loops is close to the performance of regular arrays. The slowdown is possibly caused by discontinous indexing of the SubArrays. That being said, if it is regularly strided, it should be equivalent to the regular arrays.
+* My test shows that using SubArrays inside for loops is close to the performance of regular arrays. The slowdown is possibly caused by discontinous indexing of the SubArrays. That being said, if it is regularly strided, it should be equivalent to the regular arrays.
 
-I made an experimental choice of adding a SubArray type of FaceState besides the copied array type. Although this would cause type instability for returning union type for calc_face_value, this has been greatly optimized since Julia 0.7 (https://julialang.org/blog/2018/08/union-splitting). The view type is only used for 1st order schemes, while others used the original arrays. (The reason is obvious when you look at the algorithms.)
+* I made an experimental choice of adding a `SubArray` type of FaceState besides the copied array type. Although this would cause type instability for returning union type for `calc_face_value`, this has been greatly optimized since Julia 0.7 (https://julialang.org/blog/2018/08/union-splitting). The view type is only used for 1st order schemes, while others used the original arrays. (The reason is obvious when you look at the algorithms.)
 
-Further improvements may be possible for 1D and 2D to reduce unnecessary calculations.
+* Further improvements may be possible for 1D and 2D to reduce unnecessary calculations.
 For example, in the flux calculations Flux_YV and Flux_ZV are not needed for 1D problems.
 However, considering that this code is mainly developed for 3D, the current style may be fine.
 
-If there are small arrays inside functions, consider using static arrays.
+* If there are small arrays inside functions, consider using static arrays.
 
-To speedup the loop performance, we need `@inbounds`, `@simd`, or the latest `@avx` from the `LoopVectorization.jl` package.
+* To speedup the loop performance, we need `@inbounds`, `@simd`, or the latest `@avx` from the `LoopVectorization.jl` package.
 
 I noticed a significant increase in compile time when I replace all the `@inbounds`, `@simd` with `@avx`.
 
 @fastmath is another thing worth trying.
+
+* [TimerOutputs.jl](https://github.com/KristofferC/TimerOutputs.jl) is a great package for timing.
 
 Do I need a general divergence calculation function? Or it can be specialized to my grid size?
 
