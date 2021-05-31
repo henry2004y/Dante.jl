@@ -2,8 +2,6 @@ module Flux
 
 export calc_face_flux!, init_flux, SpeedFlux, FaceFlux, FaceFluxLR
 
-using LoopVectorization
-
 using ..Parameters: Param, Rho_, Mx_, My_, Mz_, Bx_, By_, Bz_, P_, E_, U_, B_
 using ..Parameters: γ
 using ..FaceValue: FaceState
@@ -114,23 +112,23 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
    nI,nJ,nK = param.nI, param.nJ, param.nK
 
    # Density flux
-   @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+   for k = 1:nK, j = 1:nJ, i = 1:nI+1
       LFlux_XV[i,j,k,Rho_] = LState_XV[i,j,k,Mx_]
       RFlux_XV[i,j,k,Rho_] = RState_XV[i,j,k,Mx_]
    end
 
-   @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+   for k = 1:nK, j = 1:nJ+1, i = 1:nI
       LFlux_YV[i,j,k,Rho_] = LState_YV[i,j,k,My_]
       RFlux_YV[i,j,k,Rho_] = RState_YV[i,j,k,My_]
    end
 
-   @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+   for k = 1:nK+1, j = 1:nJ, i = 1:nI
       LFlux_ZV[i,j,k,Rho_] = LState_ZV[i,j,k,Mz_]
       RFlux_ZV[i,j,k,Rho_] = RState_ZV[i,j,k,Mz_]
    end
 
    # Momentum flux
-   @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+   for k = 1:nK, j = 1:nJ, i = 1:nI+1
       bL = □(LState_XV[i,j,k,Bx_], LState_XV[i,j,k,By_], LState_XV[i,j,k,Bz_])
       bR = □(RState_XV[i,j,k,Bx_], RState_XV[i,j,k,By_], RState_XV[i,j,k,Bz_])
 
@@ -148,7 +146,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
          RState_XV[i,j,k,Rho_] - RState_XV[i,j,k,Bx_]*RState_XV[i,j,k,Bz_]
    end
 
-   @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+   for k = 1:nK, j = 1:nJ+1, i = 1:nI
       bL = □(LState_YV[i,j,k,Bx_], LState_YV[i,j,k,By_], LState_YV[i,j,k,Bz_])
       bR = □(RState_YV[i,j,k,Bx_], RState_YV[i,j,k,By_], RState_YV[i,j,k,Bz_])
 
@@ -166,7 +164,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
          RState_YV[i,j,k,Rho_] - RState_YV[i,j,k,Bx_]*RState_YV[i,j,k,Bz_]
    end
 
-   @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+   for k = 1:nK+1, j = 1:nJ, i = 1:nI
       bL = □(LState_ZV[i,j,k,Bx_], LState_ZV[i,j,k,By_], LState_ZV[i,j,k,Bz_])
       bR = □(RState_ZV[i,j,k,Bx_], RState_ZV[i,j,k,By_], RState_ZV[i,j,k,Bz_])
 
@@ -185,7 +183,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
    end
 
    # Magnetic flux
-   @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+   for k = 1:nK, j = 1:nJ, i = 1:nI+1
       LFlux_XV[i,j,k,Bx_] = 0.0
       RFlux_XV[i,j,k,Bx_] = 0.0
       LFlux_XV[i,j,k,By_] = LState_XV[i,j,k,Mx_]*LState_XV[i,j,k,By_] -
@@ -198,7 +196,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
          RState_XV[i,j,k,Bx_]*RState_XV[i,j,k,Mz_]
    end
 
-   @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+   for k = 1:nK, j = 1:nJ+1, i = 1:nI
       LFlux_YV[i,j,k,Bx_] = LState_YV[i,j,k,My_]*LState_YV[i,j,k,Bx_] -
          LState_YV[i,j,k,By_]*LState_YV[i,j,k,Mx_]
       RFlux_YV[i,j,k,Bx_] = RState_YV[i,j,k,My_]*RState_YV[i,j,k,Bx_] -
@@ -211,7 +209,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
          RState_YV[i,j,k,By_]*RState_YV[i,j,k,Mz_]
    end
 
-   @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+   for k = 1:nK+1, j = 1:nJ, i = 1:nI
       LFlux_ZV[i,j,k,Bx_] = LState_ZV[i,j,k,Mz_]*LState_ZV[i,j,k,Bx_] -
          LState_ZV[i,j,k,Bz_]*LState_ZV[i,j,k,Mx_]
       RFlux_ZV[i,j,k,Bx_] = RState_ZV[i,j,k,Mz_]*RState_ZV[i,j,k,Bx_] -
@@ -226,21 +224,21 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
 
    # Pressure flux / energy flux
    if !param.UseConservative
-      @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+      for k = 1:nK, j = 1:nJ, i = 1:nI+1
          LFlux_XV[i,j,k,P_] = LState_XV[i,j,k,P_]*LState_XV[i,j,k,Mx_]/
             LState_XV[i,j,k,Rho_]
          RFlux_XV[i,j,k,P_] = RState_XV[i,j,k,P_]*RState_XV[i,j,k,Mx_]/
             RState_XV[i,j,k,Rho_]
       end
 
-      @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+      for k = 1:nK, j = 1:nJ+1, i = 1:nI
          LFlux_YV[i,j,k,P_] = LState_YV[i,j,k,P_]*LState_YV[i,j,k,My_]/
             LState_YV[i,j,k,Rho_]
          RFlux_YV[i,j,k,P_] = RState_YV[i,j,k,P_]*RState_YV[i,j,k,My_]/
             RState_YV[i,j,k,Rho_]
       end
 
-      @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+      for k = 1:nK+1, j = 1:nJ, i = 1:nI
          LFlux_ZV[i,j,k,P_] = LState_ZV[i,j,k,P_]*LState_ZV[i,j,k,Mz_]/
             LState_ZV[i,j,k,Rho_]
          RFlux_ZV[i,j,k,P_] = RState_ZV[i,j,k,P_]*RState_ZV[i,j,k,Mz_]/
@@ -248,7 +246,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
       end
    else
       # Currently use the same index for pressure/energy
-      @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+      for k = 1:nK, j = 1:nJ, i = 1:nI+1
          u = □(LState_XV[i,j,k,Mx_], LState_XV[i,j,k,My_], LState_XV[i,j,k,Mz_])
          b = □(LState_XV[i,j,k,Bx_], LState_XV[i,j,k,By_], LState_XV[i,j,k,Bz_])
          ub= LState_XV[i,j,k,Mx_]*LState_XV[i,j,k,Bx_] +
@@ -260,7 +258,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
             LState_XV[i,j,k,Bx_]
       end
 
-      @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+      for k = 1:nK, j = 1:nJ, i = 1:nI+1
          u = □(RState_XV[i,j,k,Mx_], RState_XV[i,j,k,My_], RState_XV[i,j,k,Mz_])
          b = □(RState_XV[i,j,k,Bx_], RState_XV[i,j,k,By_], RState_XV[i,j,k,Bz_])
          ub= RState_XV[i,j,k,Mx_]*RState_XV[i,j,k,Bx_] +
@@ -272,7 +270,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
             RState_XV[i,j,k,Bx_]
       end
 
-      @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+      for k = 1:nK, j = 1:nJ+1, i = 1:nI
          u = □(LState_YV[i,j,k,Mx_], LState_YV[i,j,k,My_], LState_YV[i,j,k,Mz_])
          b = □(LState_YV[i,j,k,Bx_], LState_YV[i,j,k,By_], LState_YV[i,j,k,Bz_])
          ub= LState_YV[i,j,k,Mx_]*LState_YV[i,j,k,Bx_] +
@@ -284,7 +282,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
             LState_YV[i,j,k,Bx_]
       end
 
-      @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+      for k = 1:nK, j = 1:nJ+1, i = 1:nI
          u = □(RState_YV[i,j,k,Mx_], RState_YV[i,j,k,My_], RState_YV[i,j,k,Mz_])
          b = □(RState_YV[i,j,k,Bx_], RState_YV[i,j,k,By_], RState_YV[i,j,k,Bz_])
          ub= RState_YV[i,j,k,Mx_]*RState_YV[i,j,k,Bx_] +
@@ -296,7 +294,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
             RState_YV[i,j,k,Bx_]
       end
 
-      @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+      for k = 1:nK+1, j = 1:nJ, i = 1:nI
          u = □(LState_ZV[i,j,k,Mx_], LState_ZV[i,j,k,My_], LState_ZV[i,j,k,Mz_])
          b = □(LState_ZV[i,j,k,Bx_], LState_ZV[i,j,k,By_], LState_ZV[i,j,k,Bz_])
          ub= LState_ZV[i,j,k,Mx_]*LState_ZV[i,j,k,Bx_] +
@@ -308,7 +306,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
             LState_ZV[i,j,k,Bx_]
       end
 
-      @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+      for k = 1:nK+1, j = 1:nJ, i = 1:nI
          u = □(RState_ZV[i,j,k,Mx_], RState_ZV[i,j,k,My_], RState_ZV[i,j,k,Mz_])
          b = □(RState_ZV[i,j,k,Bx_], RState_ZV[i,j,k,By_], RState_ZV[i,j,k,Bz_])
          ub= RState_ZV[i,j,k,Mx_]*RState_ZV[i,j,k,Bx_] +
@@ -322,13 +320,13 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
    end
 
    # Collect all the physical fluxes
-   @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
+   for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
       Flux_XV[i,j,k,iVar] = 0.5*(LFlux_XV[i,j,k,iVar] + RFlux_XV[i,j,k,iVar])
    end
-   @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
+   for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
       Flux_YV[i,j,k,iVar] = 0.5*(LFlux_YV[i,j,k,iVar] + RFlux_YV[i,j,k,iVar])
    end
-   @avx for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
+   for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
       Flux_ZV[i,j,k,iVar] = 0.5*(LFlux_ZV[i,j,k,iVar] + RFlux_ZV[i,j,k,iVar])
    end
 
@@ -359,17 +357,17 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
       get_speed_max!(param, faceValue, speedFlux)
 
       if !param.UseConservative
-         @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
+         for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
             Flux_XV[i,j,k,iVar] -= 0.5*Cmax_XF[i,j,k]*(RState_XV[i,j,k,iVar] -
                LState_XV[i,j,k,iVar])
          end
 
-         @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
+         for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
             Flux_YV[i,j,k,iVar] -= 0.5*Cmax_YF[i,j,k]*(RState_YV[i,j,k,iVar] -
                LState_YV[i,j,k,iVar])
          end
 
-         @avx for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
+         for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
             Flux_ZV[i,j,k,iVar] -= 0.5*Cmax_ZF[i,j,k]*(RState_ZV[i,j,k,iVar] -
                LState_ZV[i,j,k,iVar])
          end
@@ -377,12 +375,12 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
          # If I solve energy equation instead of pressure, there's
          # duplicate calculation above, even though the expression
          # looks compact. That's why I use an if-else statement
-         @avx for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ, i = 1:nI+1
+         for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ, i = 1:nI+1
             Flux_XV[i,j,k,iVar] -= 0.5*Cmax_XF[i,j,k]*(RState_XV[i,j,k,iVar] -
                LState_XV[i,j,k,iVar])
          end
 
-         @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+         for k = 1:nK, j = 1:nJ, i = 1:nI+1
             uL = □(LState_XV[i,j,k,Mx_],LState_XV[i,j,k,My_],LState_XV[i,j,k,Mz_])
             uR = □(RState_XV[i,j,k,Mx_],RState_XV[i,j,k,My_],RState_XV[i,j,k,Mz_])
             bL = □(LState_XV[i,j,k,Bx_],LState_XV[i,j,k,By_],LState_XV[i,j,k,Bz_])
@@ -395,12 +393,12 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                + 0.5*bL))
          end
 
-         @avx for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ+1, i = 1:nI
+         for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ+1, i = 1:nI
             Flux_YV[i,j,k,iVar] -= 0.5*Cmax_YF[i,j,k]*(RState_YV[i,j,k,iVar] -
                LState_YV[i,j,k,iVar])
          end
 
-         @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+         for k = 1:nK, j = 1:nJ+1, i = 1:nI
             uL = □(LState_YV[i,j,k,Mx_],LState_YV[i,j,k,My_],LState_YV[i,j,k,Mz_])
             uR = □(RState_YV[i,j,k,Mx_],RState_YV[i,j,k,My_],RState_YV[i,j,k,Mz_])
             bL = □(LState_YV[i,j,k,Bx_],LState_YV[i,j,k,By_],LState_YV[i,j,k,Bz_])
@@ -413,12 +411,12 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                + 0.5*bL))
          end
 
-         @avx for iVar = Rho_:Bz_, k = 1:nK+1, j = 1:nJ, i = 1:nI
+         for iVar = Rho_:Bz_, k = 1:nK+1, j = 1:nJ, i = 1:nI
             Flux_ZV[i,j,k,iVar] -= 0.5*Cmax_ZF[i,j,k]*(RState_ZV[i,j,k,iVar] -
                LState_ZV[i,j,k,iVar])
          end
 
-         @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+         for k = 1:nK+1, j = 1:nJ, i = 1:nI
             uL = □(LState_ZV[i,j,k,Mx_],LState_ZV[i,j,k,My_],LState_ZV[i,j,k,Mz_])
             uR = □(RState_ZV[i,j,k,Mx_],RState_ZV[i,j,k,My_],RState_ZV[i,j,k,Mz_])
             bL = □(LState_ZV[i,j,k,Bx_],LState_ZV[i,j,k,By_],LState_ZV[i,j,k,Bz_])
@@ -447,7 +445,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
       get_speed_maxmin!(param, faceValue, speedFlux)
 
       if ~param.UseConservative
-         @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
+         for iVar = 1:nVar, k = 1:nK, j = 1:nJ, i = 1:nI+1
             Flux_XV[i,j,k,iVar] -= 0.5*(Cmax_XF[i,j,k] + Cmin_XF[i,j,k])/
                (Cmax_XF[i,j,k] - Cmin_XF[i,j,k])*
                (RFlux_XV[i,j,k,iVar] - LFlux_XV[i,j,k,iVar]) -
@@ -455,7 +453,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                (RState_XV[i,j,k,iVar] - LState_XV[i,j,k,iVar])
          end
 
-         @avx for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
+         for iVar = 1:nVar, k = 1:nK, j = 1:nJ+1, i = 1:nI
             Flux_YV[i,j,k,iVar] -= 0.5*(Cmax_YF[i,j,k] + Cmin_YF[i,j,k])/
                (Cmax_YF[i,j,k] - Cmin_YF[i,j,k])*
                (RFlux_YV[i,j,k,iVar] - LFlux_YV[i,j,k,iVar]) -
@@ -463,7 +461,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                (RState_YV[i,j,k,iVar] - LState_YV[i,j,k,iVar])
          end
 
-         @avx for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
+         for iVar = 1:nVar, k = 1:nK+1, j = 1:nJ, i = 1:nI
             Flux_ZV[i,j,k,iVar] -= 0.5*(Cmax_ZF[i,j,k] + Cmin_ZF[i,j,k])/
                (Cmax_ZF[i,j,k] - Cmin_ZF[i,j,k])*
                (RFlux_ZV[i,j,k,iVar] - LFlux_ZV[i,j,k,iVar]) -
@@ -475,7 +473,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
          # duplicate calculation above, even though the expression
          # looks compact. That's why I use an if-else statement.
 
-         @avx for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ, i = 1:nI+1
+         for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ, i = 1:nI+1
             Flux_XV[i,j,k,iVar] -= 0.5*(Cmax_XF[i,j,k] + Cmin_XF[i,j,k])/
                (Cmax_XF[i,j,k] - Cmin_XF[i,j,k])*
                (RFlux_XV[i,j,k,iVar] - LFlux_XV[i,j,k,iVar]) -
@@ -483,7 +481,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                (RState_XV[i,j,k,iVar] - LState_XV[i,j,k,iVar])
          end
 
-         @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+         for k = 1:nK, j = 1:nJ, i = 1:nI+1
             uL = □(LState_XV[i,j,k,Mx_],LState_XV[i,j,k,My_],LState_XV[i,j,k,Mz_])
             uR = □(RState_XV[i,j,k,Mx_],RState_XV[i,j,k,My_],RState_XV[i,j,k,Mz_])
             bL = □(LState_XV[i,j,k,Bx_],LState_XV[i,j,k,By_],LState_XV[i,j,k,Bz_])
@@ -499,7 +497,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                0.5/LState_XV[i,j,k,Rho_]*uL + 0.5*bL) )
          end
 
-         @avx for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ+1, i = 1:nI
+         for iVar = Rho_:Bz_, k = 1:nK, j = 1:nJ+1, i = 1:nI
             Flux_YV[i,j,k,iVar] -= 0.5*(Cmax_YF[i,j,k] + Cmin_YF[i,j,k])/
                (Cmax_YF[i,j,k] - Cmin_YF[i,j,k])*
                (RFlux_YV[i,j,k,iVar] - LFlux_YV[i,j,k,iVar]) -
@@ -507,7 +505,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                (RState_YV[i,j,k,iVar] - LState_YV[i,j,k,iVar])
          end
 
-         @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+         for k = 1:nK, j = 1:nJ+1, i = 1:nI
             uL = □(LState_YV[i,j,k,Mx_],LState_YV[i,j,k,My_],LState_YV[i,j,k,Mz_])
             uR = □(RState_YV[i,j,k,Mx_],RState_YV[i,j,k,My_],RState_YV[i,j,k,Mz_])
             bL = □(LState_YV[i,j,k,Bx_],LState_YV[i,j,k,By_],LState_YV[i,j,k,Bz_])
@@ -523,7 +521,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                0.5/LState_YV[i,j,k,Rho_]*uL + 0.5*bL) )
          end
 
-         @avx for iVar = Rho_:Bz_, k = 1:nK+1, j = 1:nJ, i = 1:nI
+         for iVar = Rho_:Bz_, k = 1:nK+1, j = 1:nJ, i = 1:nI
             Flux_ZV[i,j,k,iVar] -= 0.5*(Cmax_ZF[i,j,k] + Cmin_ZF[i,j,k])/
                (Cmax_ZF[i,j,k] - Cmin_ZF[i,j,k])*
                (RFlux_ZV[i,j,k,iVar] - LFlux_ZV[i,j,k,iVar]) -
@@ -531,7 +529,7 @@ function add_numerical_flux!(param::Param, faceValue::FaceState,
                (RState_ZV[i,j,k,iVar] - LState_ZV[i,j,k,iVar])
          end
 
-         @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+         for k = 1:nK+1, j = 1:nJ, i = 1:nI
             uL = □(LState_ZV[i,j,k,Mx_],LState_ZV[i,j,k,My_],LState_ZV[i,j,k,Mz_])
             uR = □(RState_ZV[i,j,k,Mx_],RState_ZV[i,j,k,My_],RState_ZV[i,j,k,Mz_])
             bL = □(LState_ZV[i,j,k,Bx_],LState_ZV[i,j,k,By_],LState_ZV[i,j,k,Bz_])
@@ -563,7 +561,7 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
    Cmax_YF = speedFlux.Cmax_YF
    Cmax_ZF = speedFlux.Cmax_ZF
 
-   @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+   for k = 1:nK, j = 1:nJ, i = 1:nI+1
       Cs2_XF = γ*(LS_XV[i,j,k,P_] + RS_XV[i,j,k,P_]) /
          (LS_XV[i,j,k,Rho_] + RS_XV[i,j,k,Rho_])
       Ca2_XF = □(LS_XV[i,j,k,Bx_] + RS_XV[i,j,k,Bx_],
@@ -578,7 +576,7 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
          √((Cs2_XF + Ca2_XF)^2 - 4.0*Cs2_XF*Can2_XF)) )
    end
 
-   @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+   for k = 1:nK, j = 1:nJ+1, i = 1:nI
       Cs2_YF = γ*(LS_YV[i,j,k,P_] + RS_YV[i,j,k,P_]) /
          (LS_YV[i,j,k,Rho_] + RS_YV[i,j,k,Rho_])
       Ca2_YF = □(LS_YV[i,j,k,Bx_] + RS_YV[i,j,k,Bx_],
@@ -592,7 +590,7 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
          √((Cs2_YF + Ca2_YF)^2 - 4.0*Cs2_YF*Can2_YF)) )
    end
 
-   @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+   for k = 1:nK+1, j = 1:nJ, i = 1:nI
       Cs2_ZF = γ*(LS_ZV[i,j,k,P_] + RS_ZV[i,j,k,P_]) /
          (LS_ZV[i,j,k,Rho_] + RS_ZV[i,j,k,Rho_])
       Ca2_ZF = □(LS_ZV[i,j,k,Bx_] + RS_ZV[i,j,k,Bx_],
@@ -626,7 +624,7 @@ function get_speed_maxmin!(param::Param, faceValue::FaceState,
    # There must be better ways to do this: LS_XV and RS_XV is just a shift of state_GV,
    # so some repetitive calculation can be avoided!
 
-   @avx for k = 1:nK, j = 1:nJ, i = 1:nI+1
+   for k = 1:nK, j = 1:nJ, i = 1:nI+1
       Cs2_LXF = γ*LS_XV[i,j,k,P_]/LS_XV[i,j,k,Rho_]
       Ca2_LXF = □(LS_XV[i,j,k,Bx_], LS_XV[i,j,k,By_], LS_XV[i,j,k,Bz_]) /
          LS_XV[i,j,k,Rho_]
@@ -648,7 +646,7 @@ function get_speed_maxmin!(param::Param, faceValue::FaceState,
       Cmin_XF[i,j,k] = min(0, u_LXF-c_LXF, u_RXF-c_RXF)
    end
 
-   @avx for k = 1:nK, j = 1:nJ+1, i = 1:nI
+   for k = 1:nK, j = 1:nJ+1, i = 1:nI
       Cs2_LYF = γ*LS_YV[i,j,k,P_]/LS_YV[i,j,k,Rho_]
       Ca2_LYF = □(LS_YV[i,j,k,Bx_], LS_YV[i,j,k,By_], LS_YV[i,j,k,Bz_]) /
          LS_YV[i,j,k,Rho_]
@@ -669,7 +667,7 @@ function get_speed_maxmin!(param::Param, faceValue::FaceState,
       Cmin_YF[i,j,k] = min(0, u_LYF-c_LYF, u_RYF-c_RYF)
    end
 
-   @avx for k = 1:nK+1, j = 1:nJ, i = 1:nI
+   for k = 1:nK+1, j = 1:nJ, i = 1:nI
       Cs2_LZF = γ*LS_ZV[i,j,k,P_]/LS_ZV[i,j,k,Rho_]
       Ca2_LZF = □(LS_ZV[i,j,k,Bx_], LS_ZV[i,j,k,By_], LS_ZV[i,j,k,Bz_]) /
          LS_ZV[i,j,k,Rho_]

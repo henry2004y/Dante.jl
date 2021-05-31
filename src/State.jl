@@ -2,8 +2,6 @@ module State
 
 export set_init, set_init_Riemann, update_state!
 
-using LoopVectorization
-
 using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
 using ..Parameters: γ
 using ..Flux: FaceFlux
@@ -182,14 +180,14 @@ function update_state!(param::Param, state_GV, dt::Float64,
    if param.TypeGrid == "Cartesian"
       # No need for volume and face if the grid is uniform Cartesian
       if !param.UseConservative
-         @avx for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
+         for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
             state_GV[i+nG,j+nG,k+nG,iVar] -= dt*( -source_GV[i,j,k,iVar] +
             (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
             (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
             (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k,iVar])/CellSize_D[3])
          end
       else
-         @avx for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+         for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
             u = □(state_GV[i,j,k,Ux_], state_GV[i,j,k,Uy_], state_GV[i,j,k,Uz_])
             b = □(state_GV[i,j,k,Bx_], state_GV[i,j,k,By_], state_GV[i,j,k,Bz_])
 
@@ -197,14 +195,14 @@ function update_state!(param::Param, state_GV, dt::Float64,
                0.5/state_GV[i,j,k,Rho_]*u + 0.5*b
          end
 
-         @avx for iVar=Rho_:Bz_, k=1:nK, j=1:nJ, i=1:nI
+         for iVar=Rho_:Bz_, k=1:nK, j=1:nJ, i=1:nI
             state_GV[i+nG,j+nG,k+nG,iVar] -= dt*(source_GV[i,j,k,iVar] +
             (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
             (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
             (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k+1,iVar])/CellSize_D[3])
          end
 
-         @avx for k=1:nK, j=1:nJ, i=1:nI
+         for k=1:nK, j=1:nJ, i=1:nI
             u = □(state_GV[i+nG,j+nG,k+nG,Ux_],
                state_GV[i+nG,j+nG,k+nG,Uy_],
                state_GV[i+nG,j+nG,k+nG,Uz_])
@@ -245,14 +243,14 @@ function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
    if param.TypeGrid == "Cartesian"
       # No need for volume and face if the grid is uniform Cartesian
       if !param.UseConservative
-         @avx for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
+         for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
             state_GV[i+nG,j+nG,k+nG,iVar] -= dt[i,j,k]*(-source_GV[i,j,k,iVar] +
             (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
             (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
             (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k,iVar])/CellSize_D[3])
          end
       else
-         @avx for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+         for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
             u = □(state_GV[i,j,k,Ux_], state_GV[i,j,k,Uy_], state_GV[i,j,k,Uz_])
             b = □(state_GV[i,j,k,Bx_], state_GV[i,j,k,By_], state_GV[i,j,k,Bz_])
 
@@ -260,14 +258,14 @@ function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
                0.5/state_GV[i,j,k,Rho_]*u + 0.5*b
          end
 
-         @avx for iVar=Rho_:Bz_, k=1:nK, j=1:nJ, i=1:nI
+         for iVar=Rho_:Bz_, k=1:nK, j=1:nJ, i=1:nI
             state_GV[i+nG,j+nG,k+nG,iVar] -= dt[i,j,k]*(source_GV[i,j,k,iVar] +
             (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
             (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
             (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k+1,iVar])/CellSize_D[3])
          end
 
-         @avx for k=1:nK, j=1:nJ, i=1:nI
+         for k=1:nK, j=1:nJ, i=1:nI
             u = □(state_GV[i+nG,j+nG,k+nG,Ux_],
                state_GV[i+nG,j+nG,k+nG,Uy_],
                state_GV[i+nG,j+nG,k+nG,Uz_])

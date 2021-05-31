@@ -4,7 +4,7 @@ export Param, setParameters
 export Rho_, Ux_, Uy_, Uz_, Mx_, My_, Mz_, Bx_, By_, Bz_, P_, E_, U_, M_, B_
 export γ
 
-using Pkg.TOML # This should be replaced by a stand-alone TOML package!
+using TOML
 
 abstract type Param end
 
@@ -101,7 +101,7 @@ function setParameters(filename="run/PARAM.toml")
 	nI = paramIn["Grid"]["nI"]::Int
 	nJ = paramIn["Grid"]["nJ"]::Int
 	nK = paramIn["Grid"]["nK"]::Int
-	xyzMinMax_D = hcat(paramIn["Grid"]["xyzMinMax"]::Array{Array,1}...)::Array{Float64}
+	xyzMinMax_D = hcat(paramIn["Grid"]["xyzMinMax"]...)::Array{Float64} 
 
 	CoordMinMax_D = [0.0 0.0 0.0; 1.0 1.0 1.0]
 
