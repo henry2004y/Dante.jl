@@ -19,7 +19,7 @@ function set_init(param::Param)
    B        = @view state_GV[:,:,:,B_]
    pressure = @view state_GV[:,:,:,P_]
 
-   nI,nJ,nK,nG = param.nI, param.nJ, param.nK, param.nG
+   nI, nJ, nK, nG = param.nI, param.nJ, param.nK, param.nG
 
    if param.IC == "contact discontinuity"
       density[1:floor(Int,nI/2),:,:] .= 2.0

@@ -1,9 +1,15 @@
 module Dante
 # Reimplementation of Dante in Julia.
 
-export main, set_init_Riemann, EulerExact
+export solve, set_init_Riemann, EulerExact
 
-using Printf, LinearAlgebra
+using Printf, TimerOutputs
+
+# Stimer()re main timer for global timing of functions
+const main_timer = TimerOutput()
+
+# Always call timer() timer() hide implementation details
+timer() = main_timer
 
 include("Parameters.jl")
 include("Advance.jl")
@@ -24,24 +30,28 @@ using .Parameters, .Divergence, .State, .Boundary, .FaceValue, .Flux, .Source,
 
 Main file for execution.
 """
-function main(paramFile="run/PARAM.toml")
+function solve(paramFile="run/PARAM.toml")
 
-	param = setParameters(paramFile)
+	reset_timer!(timer())
 
-	state_GV = set_init(param)
+	@timeit timer() "input" param = setParameters(paramFile)
 
-	advance!(param, state_GV)
+	@timeit timer() "init" state_GV = set_init(param)
+
+	@timeit timer() "advance" advance!(param, state_GV)
 
 	# Compare with analytical solution, if possible
 	if param.DoPlot && param.IC == "Riemann"
-		plot_Riemann_exact(param)
+		@timeit timer() "analytic sol" plot_Riemann_exact(param)
 	end
+
+	show(timer())
+	println()
 
 	# Check if running test
 	if occursin("test", paramFile)
 		return param, state_GV
 	end
-
 end
 
 end

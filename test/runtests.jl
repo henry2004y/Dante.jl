@@ -2,7 +2,7 @@
 using Dante, LinearAlgebra, Test
 
 @testset "Riemann Problem" begin
-   param, state_GV = main("PARAM_test.toml")
+   param, state_GV = solve("PARAM_test.toml")
    # Obtain the initial states
    Rho, U, P, tEnd = set_init_Riemann(param.RiemannProblemType, false)
    # Exact solution

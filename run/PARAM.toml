@@ -14,6 +14,8 @@ RiemannProblemType = 1
 nStep      = 100
 tEnd       = 0.1
 
+verbose    = true
+
 [Grid]
 TypeGrid   = "Cartesian"
 xyzMinMax  = [[0.0, 1.0]]

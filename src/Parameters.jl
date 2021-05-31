@@ -27,12 +27,12 @@ const B_         = Bx_:Bz_
 const γ = 5.0/3.0
 
 # Parameters
-struct Param3D <: Param
-	nD::Int
-	nI::Int
-	nJ::Int
-	nK::Int
-	nG::Int
+struct Param3D{typeInt, typeFloat, typeRange<:AbstractArray} <: Param 
+	nD::typeInt
+	nI::typeInt
+	nJ::typeInt
+	nK::typeInt
+	nG::typeInt
 	TypeGrid::String
 	Order::Int
 	Scheme::String
@@ -40,48 +40,37 @@ struct Param3D <: Param
 	TimeAccurate::Bool
 	UseConservative::Bool
 	UseGPU::Bool
-	iMin::Int
-	iMax::Int
-	jMin::Int
-	jMax::Int
-	kMin::Int
-	kMax::Int
-	iMinAll::Int
-	iMaxAll::Int
-	jMinAll::Int
-	jMaxAll::Int
-	kMinAll::Int
-	kMaxAll::Int
-	CFL::Float64
-	nStep::Int             # Total timesteps
-	tEnd::Float64
+	verbose::Bool
+	iMin::typeInt
+	iMax::typeInt
+	jMin::typeInt
+	jMax::typeInt
+	kMin::typeInt
+	kMax::typeInt
+	iMinAll::typeInt
+	iMaxAll::typeInt
+	jMinAll::typeInt
+	jMaxAll::typeInt
+	kMinAll::typeInt
+	kMaxAll::typeInt
+	CFL::typeFloat
+	nStep::typeInt             # Total timesteps
+	tEnd::typeFloat
 	TypeBc::Vector{String} # Type of boundary conditions
 	IC::String
-	RiemannProblemType::Int
+	RiemannProblemType::typeInt
 
-	nVar::Int
+	nVar::typeInt
 
 	DoPlot::Bool
-	PlotInterval::Int
+	PlotInterval::typeInt
 	PlotVar::String
-	x::StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}
-	y::StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}
-	z::StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}
-	FullSize::Vector{Int}
-	GridSize::Vector{Int}
-	CellSize_D::Vector{Float64}
-
-	function Param3D(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,
-		UseConservative,UseGPU,iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,
-		jMaxAll,kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,
-		PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
-		@assert(0 ≤ tEnd, "Simulation time must be positive!")
-
-		new(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,UseConservative,UseGPU,
-		iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,jMaxAll,
-		kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,PlotVar,
-		x,y,z,FullSize,GridSize,CellSize_D)
-	end
+	x::typeRange
+	y::typeRange
+	z::typeRange
+	FullSize::Vector{typeInt}
+	GridSize::Vector{typeInt}
+	CellSize_D::Vector{typeFloat}
 end
 
 """
@@ -115,6 +104,7 @@ function setParameters(filename="run/PARAM.toml")
 	UseGPU = paramIn["Parameters"]["UseGPU"]::Bool
 	nStep  = paramIn["Parameters"]["nStep"]::Int64
 	tEnd = paramIn["Parameters"]["tEnd"]::Float64
+	@assert(0 ≤ tEnd, "Simulation time must be positive!")
 	DoPlot = paramIn["Plots"]["DoPlot"]::Bool
 	PlotInterval = paramIn["Plots"]["PlotInterval"]::Int64
 	PlotVar = paramIn["Plots"]["PlotVar"]::String
@@ -177,10 +167,13 @@ function setParameters(filename="run/PARAM.toml")
 		end
 	end
 
+	verbose = paramIn["Parameters"]["verbose"]::Bool
+
 	param = Param3D(nD,nI,nJ,nK,nG,TypeGrid,Order,Scheme,limiter,TimeAccurate,
-	UseConservative,UseGPU,iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll,
-	jMaxAll,kMinAll,kMaxAll,CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,PlotInterval,
-	PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
+		UseConservative,UseGPU,verbose,
+		iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll, jMaxAll,kMinAll,kMaxAll,
+		CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,
+		PlotInterval,PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
 end
 
 end
