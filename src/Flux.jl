@@ -241,7 +241,7 @@ function get_physical_flux!(param::Param, faceValue::FaceState,
             RState_ZV[i,j,k,Rho_]
       end
    else
-      # Currently use the same index @inbounds for pressure/energy
+      # Currently use the same index for pressure/energy
       @inbounds for k = 1:nK, j = 1:nJ, i = 1:nI+1
          u = □(LState_XV[i,j,k,Mx_], LState_XV[i,j,k,My_], LState_XV[i,j,k,Mz_])
          b = □(LState_XV[i,j,k,Bx_], LState_XV[i,j,k,By_], LState_XV[i,j,k,Bz_])
