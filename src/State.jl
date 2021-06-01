@@ -66,8 +66,8 @@ end
 """
 	set_init_Riemann(RiemannProblemType, Verbose)
 
-Set the initial conditions of Riemann problems. Note that currently tEnd and CFL
-number can only be set in PARAM.toml, and cannot be changed afterwards.
+Set the initial conditions of Riemann problems. Note that currently tEnd and CFL number can
+only be set in PARAM.toml, and cannot be changed afterwards.
 """
 function set_init_Riemann(RiemannProblemType, Verbose=true)
 
@@ -163,71 +163,8 @@ function set_init_Riemann(RiemannProblemType, Verbose=true)
    return rho, u, p, tEnd, CFL
 end
 
-"""Time-accurate version."""
-function update_state!(param::Param, state_GV, dt::Float64,
-   faceFlux::FaceFlux, source_GV)
-
-   Flux_XV = faceFlux.Flux_XV
-   Flux_YV = faceFlux.Flux_YV
-   Flux_ZV = faceFlux.Flux_ZV
-
-   CellSize_D = param.CellSize_D
-   iMin, iMax, jMin, jMax, kMin, kMax =
-      param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
-   nVar = param.nVar
-   nI,nJ,nK,nG = param.nI, param.nJ, param.nK, param.nG
-
-   if param.TypeGrid == "Cartesian"
-      # No need for volume and face if the grid is uniform Cartesian
-      if !param.UseConservative
-         for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
-            state_GV[i+nG,j+nG,k+nG,iVar] -= dt*( -source_GV[i,j,k,iVar] +
-            (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
-            (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
-            (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k,iVar])/CellSize_D[3])
-         end
-      else
-         for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
-            u = □(state_GV[i,j,k,Ux_], state_GV[i,j,k,Uy_], state_GV[i,j,k,Uz_])
-            b = □(state_GV[i,j,k,Bx_], state_GV[i,j,k,By_], state_GV[i,j,k,Bz_])
-
-            state_GV[i,j,k,E_] = state_GV[i,j,k,P_]/(γ-1.0) +
-               0.5/state_GV[i,j,k,Rho_]*u + 0.5*b
-         end
-
-         for iVar=Rho_:Bz_, k=1:nK, j=1:nJ, i=1:nI
-            state_GV[i+nG,j+nG,k+nG,iVar] -= dt*(source_GV[i,j,k,iVar] +
-            (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
-            (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
-            (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k+1,iVar])/CellSize_D[3])
-         end
-
-         for k=1:nK, j=1:nJ, i=1:nI
-            u = □(state_GV[i+nG,j+nG,k+nG,Ux_],
-               state_GV[i+nG,j+nG,k+nG,Uy_],
-               state_GV[i+nG,j+nG,k+nG,Uz_])
-            b = □(state_GV[i+nG,j+nG,k+nG,Bx_],
-               state_GV[i+nG,j+nG,k+nG,By_],
-               state_GV[i+nG,j+nG,k+nG,Bz_])
-
-            state_GV[i+nG,j+nG,k+nG,E_] -= dt*(-source_GV[i,j,k,E_] +
-               (Flux_XV[i+1,j,k,E_] - Flux_XV[i,j,k,E_])/CellSize_D[1] +
-               (Flux_YV[i,j+1,k,E_] - Flux_YV[i,j,k,E_])/CellSize_D[2] +
-               (Flux_ZV[i,j,k+1,E_] - Flux_ZV[i,j,k,E_])/CellSize_D[3])
-
-            state_GV[i+nG,j+nG,k+nG,P_] = (γ-1.0)*(state_GV[i+nG,j+nG,k+nG,E_] -
-               0.5/state_GV[i+nG,j+nG,k+nG,Rho_]*u - 0.5*b)
-         end
-      end
-   else
-      # Need volume and face
-      state_GV .= 0.0
-   end
-
-end
-
-"Local timestepping version."
-function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
+"Time-accurate state update."
+function update_state!(param::Param, state_GV, dt::AbstractFloat, faceFlux::FaceFlux,
    source_GV)
 
    Flux_XV = faceFlux.Flux_XV
@@ -237,20 +174,19 @@ function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
    CellSize_D = param.CellSize_D
    iMin, iMax, jMin, jMax, kMin, kMax =
       param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
-   nVar = param.nVar
-   nI,nJ,nK,nG = param.nI, param.nJ, param.nK, param.nG
+   nI, nJ, nK, nG, nVar = param.nI, param.nJ, param.nK, param.nG, param.nVar
 
    if param.TypeGrid == "Cartesian"
       # No need for volume and face if the grid is uniform Cartesian
       if !param.UseConservative
-         for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
-            state_GV[i+nG,j+nG,k+nG,iVar] -= dt[i,j,k]*(-source_GV[i,j,k,iVar] +
+         @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
+            state_GV[i+nG,j+nG,k+nG,iVar] -= dt*( -source_GV[i,j,k,iVar] +
             (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
             (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
             (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k,iVar])/CellSize_D[3])
          end
       else
-         for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+         @inbounds for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
             u = □(state_GV[i,j,k,Ux_], state_GV[i,j,k,Uy_], state_GV[i,j,k,Uz_])
             b = □(state_GV[i,j,k,Bx_], state_GV[i,j,k,By_], state_GV[i,j,k,Bz_])
 
@@ -258,14 +194,14 @@ function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
                0.5/state_GV[i,j,k,Rho_]*u + 0.5*b
          end
 
-         for iVar=Rho_:Bz_, k=1:nK, j=1:nJ, i=1:nI
-            state_GV[i+nG,j+nG,k+nG,iVar] -= dt[i,j,k]*(source_GV[i,j,k,iVar] +
+         @inbounds for iVar=Rho_:Bz_, k=1:nK, j=1:nJ, i=1:nI
+            state_GV[i+nG,j+nG,k+nG,iVar] -= dt*(source_GV[i,j,k,iVar] +
             (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
             (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
             (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k+1,iVar])/CellSize_D[3])
          end
 
-         for k=1:nK, j=1:nJ, i=1:nI
+         @inbounds for k=1:nK, j=1:nJ, i=1:nI
             u = □(state_GV[i+nG,j+nG,k+nG,Ux_],
                state_GV[i+nG,j+nG,k+nG,Uy_],
                state_GV[i+nG,j+nG,k+nG,Uz_])
@@ -273,10 +209,10 @@ function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
                state_GV[i+nG,j+nG,k+nG,By_],
                state_GV[i+nG,j+nG,k+nG,Bz_])
 
-            state_GV[i+nG,j+nG,k+nG,E_] -= dt[i,j,k]*(-source_GV[i,j,k,E_] +
-               (Flux_XV[i+1,j,k,E_] - Flux_XV[i,j,k,E_])/CellSize_D[1] +
-               (Flux_YV[i,j+1,k,E_] - Flux_YV[i,j,k,E_])/CellSize_D[2] +
-               (Flux_ZV[i,j,k+1,E_] - Flux_ZV[i,j,k,E_])/CellSize_D[3])
+            state_GV[i+nG,j+nG,k+nG,E_] -= dt*( -source_GV[i,j,k,E_] +
+               (Flux_XV[i+1,j,k,E_] - Flux_XV[i,j,k,E_]) / CellSize_D[1] +
+               (Flux_YV[i,j+1,k,E_] - Flux_YV[i,j,k,E_]) / CellSize_D[2] +
+               (Flux_ZV[i,j,k+1,E_] - Flux_ZV[i,j,k,E_]) / CellSize_D[3] )
 
             state_GV[i+nG,j+nG,k+nG,P_] = (γ-1.0)*(state_GV[i+nG,j+nG,k+nG,E_] -
                0.5/state_GV[i+nG,j+nG,k+nG,Rho_]*u - 0.5*b)
@@ -286,7 +222,68 @@ function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux,
       # Need volume and face
       state_GV .= 0.0
    end
+   return
+end
 
+"Local timestepping state update."
+function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux, source_GV)
+
+   Flux_XV = faceFlux.Flux_XV
+   Flux_YV = faceFlux.Flux_YV
+   Flux_ZV = faceFlux.Flux_ZV
+
+   CellSize_D = param.CellSize_D
+   iMin, iMax, jMin, jMax, kMin, kMax =
+      param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
+   nI, nJ, nK, nG, nVar = param.nI, param.nJ, param.nK, param.nG, param.nVar
+
+   if param.TypeGrid == "Cartesian"
+      # No need for volume and face if the grid is uniform Cartesian
+      if !param.UseConservative
+         @inbounds for iVar=1:nVar, k=1:nK, j=1:nJ, i=1:nI
+            state_GV[i+nG,j+nG,k+nG,iVar] -= dt[i,j,k]*(-source_GV[i,j,k,iVar] +
+            (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar])/CellSize_D[1] +
+            (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar])/CellSize_D[2] +
+            (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k,iVar])/CellSize_D[3])
+         end
+      else
+         @inbounds for k=kMin:kMax, j=jMin:jMax, i=iMin:iMax
+            u = □(state_GV[i,j,k,Ux_], state_GV[i,j,k,Uy_], state_GV[i,j,k,Uz_])
+            b = □(state_GV[i,j,k,Bx_], state_GV[i,j,k,By_], state_GV[i,j,k,Bz_])
+
+            state_GV[i,j,k,E_] = state_GV[i,j,k,P_]/(γ-1.0) +
+               0.5/state_GV[i,j,k,Rho_]*u + 0.5*b
+         end
+
+         @inbounds for iVar=Rho_:Bz_, k=1:nK, j=1:nJ, i=1:nI
+            state_GV[i+nG,j+nG,k+nG,iVar] -= dt[i,j,k]*( source_GV[i,j,k,iVar] +
+            (Flux_XV[i+1,j,k,iVar] - Flux_XV[i,j,k,iVar]) / CellSize_D[1] +
+            (Flux_YV[i,j+1,k,iVar] - Flux_YV[i,j,k,iVar]) / CellSize_D[2] +
+            (Flux_ZV[i,j,k+1,iVar] - Flux_ZV[i,j,k+1,iVar]) / CellSize_D[3] )
+         end
+
+         @inbounds for k=1:nK, j=1:nJ, i=1:nI
+            u = □(state_GV[i+nG,j+nG,k+nG,Ux_],
+               state_GV[i+nG,j+nG,k+nG,Uy_],
+               state_GV[i+nG,j+nG,k+nG,Uz_])
+            b = □(state_GV[i+nG,j+nG,k+nG,Bx_],
+               state_GV[i+nG,j+nG,k+nG,By_],
+               state_GV[i+nG,j+nG,k+nG,Bz_])
+
+            state_GV[i+nG,j+nG,k+nG,E_] -= dt[i,j,k]*( -source_GV[i,j,k,E_] +
+               (Flux_XV[i+1,j,k,E_] - Flux_XV[i,j,k,E_]) / CellSize_D[1] +
+               (Flux_YV[i,j+1,k,E_] - Flux_YV[i,j,k,E_]) / CellSize_D[2] +
+               (Flux_ZV[i,j,k+1,E_] - Flux_ZV[i,j,k,E_]) / CellSize_D[3] )
+
+            state_GV[i+nG,j+nG,k+nG,P_] = (γ-1.0)*(state_GV[i+nG,j+nG,k+nG,E_] -
+               0.5/state_GV[i+nG,j+nG,k+nG,Rho_]*u - 0.5*b)
+         end
+      end
+   else
+      # Need volume and face
+      state_GV .= 0.0
+   end
+   return
 end
 
 end

@@ -51,19 +51,19 @@ end
 
 function compute_px(siz, px, n, hx, vec)
    @inbounds for i = 1:n-2, j = 1:siz[2], k = 1:siz[3]
-         px[i+1,j,k] = (vec[i+2,j,k,1] - vec[i,j,k,1])/(hx[i+2] - hx[i])
+      px[i+1,j,k] = (vec[i+2,j,k,1] - vec[i,j,k,1])/(hx[i+2] - hx[i])
    end
 end
 
 function compute_qy(siz, qy, n, hy, vec)
    @inbounds for i = 1:siz[1], j = 1:n-2, k = 1:siz[3]
-         qy[i,j+1,k] = (vec[i,j+2,k,2] - vec[i,j,k,2])/(hy[i+2] - hy[i])
+      qy[i,j+1,k] = (vec[i,j+2,k,2] - vec[i,j,k,2])/(hy[i+2] - hy[i])
    end
 end
 
 function compute_rz(siz, rz, n, hz, vec)
    @inbounds for i = 1:siz[1], j = 1:siz[2], k = 1:n-2
-         rz[i,j,k+1] = (vec[i,j,k+2,3] - vec[i,j,k,3])/(hz[i+2] - hz[i])
+      rz[i,j,k+1] = (vec[i,j,k+2,3] - vec[i,j,k,3])/(hz[i+2] - hz[i])
    end
 end
 

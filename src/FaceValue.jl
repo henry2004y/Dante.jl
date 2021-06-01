@@ -186,7 +186,7 @@ Return zero if opposite sign, otherwise the one of smaller magnitude.
 function minmod(a, b, c)
    s = (sign(a) + sign(b) + sign(c)) / 3.0
    if abs(s) == 1
-      m = s*min(abs(a),abs(b),abs(c))
+      m = s*min(abs(a), abs(b), abs(c))
    else
       m = 0.0
    end

@@ -86,7 +86,7 @@ function set_cell_boundary!(param::Param, state_GV)
       end
    end
 
-   return nothing
+   return
 end
 
 end
