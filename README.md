@@ -1,4 +1,4 @@
-# Dante
+# Dante.jl
 
 <p align="center">
   <a href="https://github.com/henry2004y/Dante.jl/actions">
