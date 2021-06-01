@@ -1,5 +1,5 @@
 module Dante
-# Reimplementation of Dante in Julia.
+# Reimplementation of finite volume MHD in Julia.
 
 export solve, set_init_Riemann, EulerExact
 
@@ -22,15 +22,14 @@ include("Source.jl")
 include("Time.jl")
 include("IO.jl")
 
-using .Parameters, .Divergence, .State, .Boundary, .FaceValue, .Flux, .Source,
-	.Time, .IO
+using .Parameters, .Divergence, .State, .Boundary, .FaceValue, .Flux, .Source, .Time, .IO
 
 """
-	main(paramFile)
+	solve(paramFile)
 
-Main file for execution.
+Run the model given input parameter file `paramFile`.
 """
-function solve(paramFile="run/PARAM.toml")
+function solve(paramFile="examples/PARAM_sods.toml")
 
 	reset_timer!(timer())
 
