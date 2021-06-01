@@ -15,7 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6'
           - '1' # '1' will automatically expand to the latest stable 1.x release of Julia.
         os:
           - ubuntu-latest
@@ -50,6 +49,9 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
+      - name: Install dependencies
+        run: |
+          pip install matplotlib
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
         with:
