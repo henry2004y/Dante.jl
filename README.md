@@ -15,7 +15,7 @@
   </a>
 </p>
 
-Finite volume ideal MHD model with structured mesh.
+A toy finite volume ideal MHD model with structured mesh.
 
 ## Benchmark
 
@@ -27,5 +27,3 @@ Riemann test 1 without plotting:
 ## Author
 
 * **Hongyang Zhou** - *Initial work* - [henry2004y](https://github.com/henry2004y)
-
-It originates from the [MATLAB version](https://github.com/henry2004y/FVMHD-Dante), and is then rewritten into Julia with improved performance and capabilities.
