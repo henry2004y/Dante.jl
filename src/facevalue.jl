@@ -1,8 +1,4 @@
-module FaceValue
-
-export calc_face_value!, init_face_value, FaceState, FaceGradient
-
-using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
+# Face value
 
 struct FaceState{T<:AbstractArray}
    LState_XV::T
@@ -21,7 +17,7 @@ end
 
 function init_face_value(param::Param)
 
-   nI, nJ, nK, nVar = param.nI, param.nJ, param.nK, param.nVar
+   @unpack nI, nJ, nK, nVar = param
 
    if param.Order == 2
       dq_X = Array{Float64,4}(undef,nI+2,nJ,nK,nVar)
@@ -76,8 +72,7 @@ function calc_face_value!(param::Param, state_GV,
    faceState::FaceState, faceGradient::FaceGradient)
 
    if param.Order == 1
-      iMin, iMax, jMin, jMax, kMin, kMax =
-      param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
+      @unpack iMin, iMax, jMin, jMax, kMin, kMax = param
 
       faceState.LState_XV .= @view state_GV[iMin-1:iMax,jMin:jMax,kMin:kMax,:]
       faceState.RState_XV .= @view state_GV[iMin:iMax+1,jMin:jMax,kMin:kMax,:]
@@ -86,11 +81,9 @@ function calc_face_value!(param::Param, state_GV,
       faceState.LState_ZV .= @view state_GV[iMin:iMax,jMin:jMax,kMin-1:kMax,:]
       faceState.RState_ZV .= @view state_GV[iMin:iMax,jMin:jMax,kMin:kMax+1,:]
 
-      #faceState = FaceStateView(LState_XV, RState_XV, LState_YV, RState_YV,
-      #   LState_ZV, RState_ZV)
    elseif param.Order == 2
       # Compute and limit slopes
-      nI,nJ,nK,nG,nVar = param.nI, param.nJ, param.nK, param.nG, param.nVar
+      @unpack nI, nJ, nK, nG, nVar = param
 
       LState_XV, RState_XV = faceState.LState_XV, faceState.RState_XV
       LState_YV, RState_YV = faceState.LState_YV, faceState.RState_YV
@@ -191,6 +184,4 @@ function minmod(a, b, c)
       m = 0.0
    end
    m
-end
-
 end

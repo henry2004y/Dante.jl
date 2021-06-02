@@ -3,26 +3,26 @@ module Dante
 
 export solve, set_init_Riemann, EulerExact
 
-using Printf, TimerOutputs
+using Printf, TimerOutputs, Parameters
 
-# Stimer()re main timer for global timing of functions
+# Set main timer for global timing of functions
 const main_timer = TimerOutput()
 
-# Always call timer() timer() hide implementation details
+# Always call timer() to hide implementation details
 timer() = main_timer
 
-include("Parameters.jl")
-include("Advance.jl")
-include("Divergence.jl")
-include("FaceValue.jl")
-include("Flux.jl")
-include("State.jl")
-include("Boundary.jl")
-include("Source.jl")
-include("Time.jl")
-include("IO.jl")
+include("utility.jl")
+include("input.jl")
+include("advance.jl")
+include("divergence.jl")
+include("facevalue.jl")
+include("flux.jl")
+include("state.jl")
+include("boundary.jl")
+include("source.jl")
+include("time.jl")
+include("output.jl")
 
-using .Parameters, .Divergence, .State, .Boundary, .FaceValue, .Flux, .Source, .Time, .IO
 
 """
 	solve(paramFile)

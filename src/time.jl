@@ -1,10 +1,4 @@
-module Time
-
-export calc_timestep!, init_timestep
-
-using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
-using ..Flux: SpeedFlux
-
+# Time stepping
 
 function init_timestep(param::Param)
    nI, nJ, nK = param.nI, param.nJ, param.nK
@@ -43,6 +37,4 @@ function calc_timestep!(param::Param, speedFlux::SpeedFlux, time_G)
    dt = param.TimeAccurate ? minimum(time_G) : 0.0
 
    return dt
-end
-
 end

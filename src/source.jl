@@ -1,14 +1,8 @@
-module Source
-
-export calc_source!, init_source
-
-using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Mx_, My_, Mz_, Bx_, By_, Bz_
-using ..Parameters: P_, E_, U_, M_, B_, γ
-using ..Divergence: divergence!
+# Source term
 
 function init_source(param::Param)
-   GridSize, FullSize = param.GridSize, param.FullSize
-   nVar = param.nVar
+   @unpack GridSize, FullSize, nVar = param
+
    source_GV = Array{Float64,4}(undef, GridSize..., nVar)
    div_G = Array{Float64,3}(undef, GridSize...)
 
@@ -18,10 +12,7 @@ function init_source(param::Param)
 end
 
 function calc_source!(param::Param, state_GV, source_GV, U, div_G)
-
-   nI, nJ, nK, nG = param.nI, param.nJ, param.nK, param.nG
-   iMin, iMax, jMin, jMax, kMin, kMax =
-      param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
+   @unpack nI, nJ, nK, nG, iMin, iMax, jMin, jMax, kMin, kMax = param
 
    # Compute ∇⋅B using central difference
    @views divergence!(param, state_GV[:,:,:,B_], div_G)
@@ -59,6 +50,4 @@ function calc_source!(param::Param, state_GV, source_GV, U, div_G)
    end
 
    return source_GV
-end
-
 end

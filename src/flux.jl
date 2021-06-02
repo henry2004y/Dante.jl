@@ -1,11 +1,4 @@
-module Flux
-
-export calc_face_flux!, init_flux, SpeedFlux, FaceFlux, FaceFluxLR
-
-using ..Parameters: Param, Rho_, Mx_, My_, Mz_, Bx_, By_, Bz_, P_, E_, U_, B_
-using ..Parameters: γ
-using ..FaceValue: FaceState
-include("Utility.jl")
+# Face flux
 
 abstract type SpeedFlux end
 
@@ -40,9 +33,7 @@ struct FaceFluxLR{T}
 end
 
 function init_flux(param::Param)
-
-   GridSize = param.GridSize
-   nVar = param.nVar
+   @unpack GridSize, nVar = param
 
    Flux_XV = Array{Float64,4}(undef,GridSize+[1,0,0]...,nVar)
    Flux_YV = Array{Float64,4}(undef,GridSize+[0,1,0]...,nVar)
@@ -86,24 +77,10 @@ end
 function get_physical_flux!(param::Param, faceValue::FaceState,
    faceFlux::FaceFlux, speedFlux::SpeedFlux, faceFluxLR::FaceFluxLR)
 
-   LState_XV = faceValue.LState_XV
-   RState_XV = faceValue.RState_XV
-   LState_YV = faceValue.LState_YV
-   RState_YV = faceValue.RState_YV
-   LState_ZV = faceValue.LState_ZV
-   RState_ZV = faceValue.RState_ZV
-
-   LFlux_XV, RFlux_XV = faceFluxLR.LFlux_XV, faceFluxLR.RFlux_XV
-   LFlux_YV, RFlux_YV = faceFluxLR.LFlux_YV, faceFluxLR.RFlux_YV
-   LFlux_ZV, RFlux_ZV = faceFluxLR.LFlux_ZV, faceFluxLR.RFlux_ZV
-
-   Flux_XV = faceFlux.Flux_XV
-   Flux_YV = faceFlux.Flux_YV
-   Flux_ZV = faceFlux.Flux_ZV
-
-   nVar = param.nVar
-
-   nI, nJ, nK = param.nI, param.nJ, param.nK
+   @unpack LState_XV, RState_XV, LState_YV, RState_YV, LState_ZV, RState_ZV = faceValue
+   @unpack LFlux_XV, RFlux_XV, LFlux_YV, RFlux_YV, LFlux_ZV, RFlux_ZV = faceFluxLR
+   @unpack Flux_XV, Flux_YV, Flux_ZV = faceFlux
+   @unpack nI, nJ, nK, nVar = param
 
    # Density flux
    @inbounds for k = 1:nK, j = 1:nJ, i = 1:nI+1
@@ -329,23 +306,10 @@ end
 function add_numerical_flux!(param::Param, faceValue::FaceState,
    faceFlux::FaceFlux, speedFlux::SpeedFlux, faceFluxLR::FaceFluxLR)
 
-   nI, nJ, nK = param.nI, param.nJ, param.nK
-   nVar = param.nVar
-
-   LState_XV = faceValue.LState_XV
-   RState_XV = faceValue.RState_XV
-   LState_YV = faceValue.LState_YV
-   RState_YV = faceValue.RState_YV
-   LState_ZV = faceValue.LState_ZV
-   RState_ZV = faceValue.RState_ZV
-
-   Flux_XV = faceFlux.Flux_XV
-   Flux_YV = faceFlux.Flux_YV
-   Flux_ZV = faceFlux.Flux_ZV
-
-   Cmax_XF = speedFlux.Cmax_XF
-   Cmax_YF = speedFlux.Cmax_YF
-   Cmax_ZF = speedFlux.Cmax_ZF
+   @unpack nI, nJ, nK, nVar = param
+   @unpack LState_XV, RState_XV, LState_YV, RState_YV, LState_ZV, RState_ZV = faceValue
+   @unpack Flux_XV, Flux_YV, Flux_ZV = faceFlux
+   @unpack Cmax_XF, Cmax_YF, Cmax_ZF = speedFlux
 
    if param.Scheme == "Rusanov"
       get_speed_max!(param, faceValue, speedFlux)
@@ -533,15 +497,9 @@ end
 
 "Calculate the maximum speed in each direction."
 function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
-   nI, nJ, nK = param.nI, param.nJ, param.nK
-   # Aliases
-   LS_XV, RS_XV = faceValue.LState_XV, faceValue.RState_XV
-   LS_YV, RS_YV = faceValue.LState_YV, faceValue.RState_YV
-   LS_ZV, RS_ZV = faceValue.LState_ZV, faceValue.RState_ZV
-
-   Cmax_XF = speedFlux.Cmax_XF
-   Cmax_YF = speedFlux.Cmax_YF
-   Cmax_ZF = speedFlux.Cmax_ZF
+   @unpack nI, nJ, nK = param
+   @unpack LS_XV, RS_XV, LS_YV, RS_YV, LS_ZV, RS_ZV = faceValue
+   @unpack Cmax_XF, Cmax_YF, Cmax_ZF = speedFlux
 
    @inbounds for k = 1:nK, j = 1:nJ, i = 1:nI+1
       Cs2_XF = γ*(LS_XV[i,j,k,P_] + RS_XV[i,j,k,P_]) /
@@ -589,18 +547,12 @@ function get_speed_max!(param::Param,faceValue::FaceState,speedFlux::SpeedFlux)
 end
 
 function get_speed_maxmin!(param::Param, faceValue::FaceState, speedFlux::SpeedFluxMinMax)
-   nI, nJ, nK = param.nI, param.nJ, param.nK
+   @unpack nI, nJ, nK = param
    # Aliases
    LS_XV, RS_XV = faceValue.LState_XV, faceValue.RState_XV
    LS_YV, RS_YV = faceValue.LState_YV, faceValue.RState_YV
    LS_ZV, RS_ZV = faceValue.LState_ZV, faceValue.RState_ZV
-
-   Cmax_XF = speedFlux.Cmax_XF
-   Cmax_YF = speedFlux.Cmax_YF
-   Cmax_ZF = speedFlux.Cmax_ZF
-   Cmin_XF = speedFlux.Cmin_XF
-   Cmin_YF = speedFlux.Cmin_YF
-   Cmin_ZF = speedFlux.Cmin_ZF
+   @unpack Cmax_XF, Cmax_YF, Cmax_ZF, Cmin_XF, Cmin_YF, Cmin_ZF = speedFlux
 
    # There must be better ways to do this: LS_XV and RS_XV is just a shift of state_GV,
    # so some repetitive calculation can be avoided!
@@ -657,7 +609,4 @@ function get_speed_maxmin!(param::Param, faceValue::FaceState, speedFlux::SpeedF
       Cmin_ZF[i,j,k] = min(0, u_LZF-c_LZF, u_RZF-c_RZF)
    end
    return
-end
-
-
 end

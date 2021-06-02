@@ -1,18 +1,8 @@
-module Boundary
-
-export set_cell_boundary!
-
-using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
+# Boundary conditions
 
 function set_cell_boundary!(param::Param, state_GV)
-
-   nG, TypeBc = param.nG, param.TypeBc
-   iMin, iMax, jMin, jMax, kMin, kMax =
-   param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
-   iMinAll, iMaxAll = param.iMinAll, param.iMaxAll
-   jMinAll, jMaxAll = param.jMinAll, param.jMaxAll
-   kMinAll, kMaxAll = param.kMinAll, param.kMaxAll
-   nVar = param.nVar
+   @unpack nG, nVar, TypeBc, iMin, iMax, jMin, jMax, kMin, kMax,
+      iMinAll, iMaxAll, jMinAll, jMaxAll, kMinAll, kMaxAll = param
 
    for (iBc,TypeBc) in enumerate(TypeBc)
       if TypeBc == "periodic"
@@ -87,6 +77,4 @@ function set_cell_boundary!(param::Param, state_GV)
    end
 
    return
-end
-
 end

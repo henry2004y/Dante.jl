@@ -1,8 +1,4 @@
-module Divergence
-
-export divergence!, divergence_ndgrid
-
-using ..Parameters: Param
+# Divergence calculation
 
 """
 	divergence_ndgrid!(hx, hy, hz, vec, div)
@@ -101,7 +97,4 @@ Take central differences on interior points.
    end
 
    return
-end
-
-
 end

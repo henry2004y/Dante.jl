@@ -1,19 +1,14 @@
-module IO
+# Output
 
-include("EulerExact.jl")
-
-export plotvar, plot_Riemann_exact, EulerExact
+include("euler_exact.jl")
 
 using PyPlot
-using ..Parameters: Param, Param3D, Rho_, Ux_, P_
-using ..State: set_init_Riemann
 
-"""Plot 1D variables along a line."""
+
+"Plot 1D variables along a line."
 function plotvar(param::Param, it, state_GV)
-
    # Now this only works for 1D x!
-   iMin, iMax, jMin, jMax, kMin, kMax =
-   param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
+   @unpack iMin, iMax, jMin, jMax, kMin, kMax = param
 
    plotvar = param.PlotVar
    nG = param.nG
@@ -41,7 +36,7 @@ function plotvar(param::Param, it, state_GV)
    return nothing
 end
 
-"""Plot the analytical solution of shock tube problem."""
+"Plot the analytical solution of shock tube problem."
 function plot_Riemann_exact(param::Param)
    # Obtain the initial states
    Rho, U, P, tEnd = set_init_Riemann(param.RiemannProblemType)
@@ -49,7 +44,7 @@ function plot_Riemann_exact(param::Param)
    xe, re, ue, pe, ee, te, Me, se =
       EulerExact(Rho[1], U[1], P[1], Rho[end], U[end], P[end], tEnd, 3)
 
-   # Ee = @. pe/((Parameters.γ-1)*re) + 0.5*ue^2
+   # Ee = @. pe/((γ-1)*re) + 0.5*ue^2
 
    if param.PlotVar == "rho"
       plot(xe, re, "--")
@@ -59,7 +54,5 @@ function plot_Riemann_exact(param::Param)
       plot(xe, ue, "--")
    end
 
-   return nothing
-end
-
+   return
 end

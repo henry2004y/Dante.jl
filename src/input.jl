@@ -1,8 +1,4 @@
-module Parameters
-
-export Param, setParameters
-export Rho_, Ux_, Uy_, Uz_, Mx_, My_, Mz_, Bx_, By_, Bz_, P_, E_, U_, M_, B_
-export γ
+# Input parameters
 
 using TOML
 
@@ -26,21 +22,21 @@ const B_         = Bx_:Bz_
 
 const γ = 5.0/3.0
 
-# Parameters
-struct Param3D{typeInt, typeFloat, typeRange<:AbstractArray} <: Param 
+"Model input parameters"
+@with_kw struct Param3D{typeInt, typeFloat, typeRange<:AbstractArray} <: Param 
 	nD::typeInt
 	nI::typeInt
 	nJ::typeInt
 	nK::typeInt
 	nG::typeInt
 	TypeGrid::String
-	Order::Int
+	Order::Int = 2
 	Scheme::String
-	limiter::String
-	TimeAccurate::Bool
-	UseConservative::Bool
-	UseGPU::Bool
-	verbose::Bool
+	limiter::String = "MM"
+	TimeAccurate::Bool = true
+	UseConservative::Bool = true
+	UseGPU::Bool = false
+	verbose::Bool = false
 	iMin::typeInt
 	iMax::typeInt
 	jMin::typeInt
@@ -62,8 +58,8 @@ struct Param3D{typeInt, typeFloat, typeRange<:AbstractArray} <: Param
 
 	nVar::typeInt
 
-	DoPlot::Bool
-	PlotInterval::typeInt
+	DoPlot::Bool = false
+	PlotInterval::typeInt = -1
 	PlotVar::String
 	x::typeRange
 	y::typeRange
@@ -74,11 +70,11 @@ struct Param3D{typeInt, typeFloat, typeRange<:AbstractArray} <: Param
 end
 
 """
-	setParameters()
+	setParameters(filename)
 
 Read parameters from PARAM.toml and construct the parameter list.
 """
-function setParameters(filename="run/PARAM.toml")
+function setParameters(filename)
 
 	paramIn = TOML.parsefile(filename)
 
@@ -174,6 +170,4 @@ function setParameters(filename="run/PARAM.toml")
 		iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll, jMaxAll,kMinAll,kMaxAll,
 		CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,
 		PlotInterval,PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
-end
-
 end

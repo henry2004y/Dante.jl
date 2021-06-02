@@ -1,16 +1,7 @@
-module State
-
-export set_init, set_init_Riemann, update_state!
-
-using ..Parameters: Param, Rho_, Ux_, Uy_, Uz_, Bx_, By_, Bz_, P_, E_, U_, B_
-using ..Parameters: γ
-using ..Flux: FaceFlux
-include("Utility.jl")
+# State variables
 
 function set_init(param::Param)
-
-   FullSize = param.FullSize
-   nVar = param.nVar
+   @unpack  FullSize, nVar, nI, nJ, nK, nG = param
 
    state_GV = zeros(FullSize[1],FullSize[2],FullSize[3], nVar)
 
@@ -18,8 +9,6 @@ function set_init(param::Param)
    velocity = @view state_GV[:,:,:,U_]
    B        = @view state_GV[:,:,:,B_]
    pressure = @view state_GV[:,:,:,P_]
-
-   nI, nJ, nK, nG = param.nI, param.nJ, param.nK, param.nG
 
    if param.IC == "contact discontinuity"
       density[1:floor(Int,nI/2),:,:] .= 2.0
@@ -167,14 +156,8 @@ end
 function update_state!(param::Param, state_GV, dt::AbstractFloat, faceFlux::FaceFlux,
    source_GV)
 
-   Flux_XV = faceFlux.Flux_XV
-   Flux_YV = faceFlux.Flux_YV
-   Flux_ZV = faceFlux.Flux_ZV
-
-   CellSize_D = param.CellSize_D
-   iMin, iMax, jMin, jMax, kMin, kMax =
-      param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
-   nI, nJ, nK, nG, nVar = param.nI, param.nJ, param.nK, param.nG, param.nVar
+   @unpack Flux_XV, Flux_YV, Flux_ZV = faceFlux
+   @unpack CellSize_D, iMin, iMax, jMin, jMax, kMin, kMax, nI, nJ, nK, nG, nVar = param
 
    if param.TypeGrid == "Cartesian"
       # No need for volume and face if the grid is uniform Cartesian
@@ -227,15 +210,8 @@ end
 
 "Local timestepping state update."
 function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux, source_GV)
-
-   Flux_XV = faceFlux.Flux_XV
-   Flux_YV = faceFlux.Flux_YV
-   Flux_ZV = faceFlux.Flux_ZV
-
-   CellSize_D = param.CellSize_D
-   iMin, iMax, jMin, jMax, kMin, kMax =
-      param.iMin, param.iMax, param.jMin, param.jMax, param.kMin, param.kMax
-   nI, nJ, nK, nG, nVar = param.nI, param.nJ, param.nK, param.nG, param.nVar
+   @unpack Flux_XV, Flux_YV, Flux_ZV = faceFlux
+   @unpack CellSize_D, iMin, iMax, jMin, jMax, kMin, kMax, nI, nJ, nK, nG, nVar = param
 
    if param.TypeGrid == "Cartesian"
       # No need for volume and face if the grid is uniform Cartesian
@@ -284,6 +260,4 @@ function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux, source_GV
       state_GV .= 0.0
    end
    return
-end
-
 end

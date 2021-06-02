@@ -1,8 +1,7 @@
 # I don't like the current implementation for timestepping!
 "Explicit time advance."
 function advance!(param, state_GV)
-
-	verbose = param.verbose
+	@unpack verbose = param
 
 	faceState, faceGradient = init_face_value(param)
 

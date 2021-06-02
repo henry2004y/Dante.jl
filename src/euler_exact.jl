@@ -5,8 +5,8 @@ using Roots
 
 Classical Gas Exact Riemann Solver for shock tube problems
 This programs is based on the code of
-[1]  P. Wesseling. PRINCIPLES OF COMPUTATIONAL FLUID DYNAMICS Springer-Verlag,
-Berlin etc., 2001. ISBN 3-540-67853-0
+P. Wesseling. PRINCIPLES OF COMPUTATIONAL FLUID DYNAMICS Springer-Verlag, Berlin etc., 2001.
+ISBN 3-540-67853-0
 NOTE:
 A Cavitation Check is incorporated in the code. It further prevents plotting for
  possible but physically unlikely case of expansion shocks.
@@ -20,12 +20,12 @@ A Cavitation Check is incorporated in the code. It further prevents plotting for
 - `tEnd::Float64`: final solution time.
 - `n::Integer64`: the gas Degree of freedom.
 Coded by Manuel Diaz, IAM, NTU 03/09/2011.
-Modified by Hongyang Zhou from Matlab to Julia, 11/05/2019
+Migrated by Hongyang Zhou from MATLAB to Julia, 11/05/2019
 """
 function EulerExact(ρ1, u1, p1, ρ4, u4, p4, tEnd, n)
 
    # Gamma values
-   γ=(n+2)/n; α=(γ+1)/(γ-1)
+   γ = (n+2)/n; α = (γ+1)/(γ-1)
 
    # Assumed structure of exact solution
    #
