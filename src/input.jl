@@ -23,12 +23,12 @@ const B_         = Bx_:Bz_
 const γ = 5.0/3.0
 
 "Model input parameters"
-@with_kw struct Param3D{typeInt, typeFloat, typeRange<:AbstractArray} <: Param 
-	nD::typeInt
-	nI::typeInt
-	nJ::typeInt
-	nK::typeInt
-	nG::typeInt
+@with_kw struct Param3D{IntT, RealT, RangeT<:AbstractArray} <: Param
+	nD::IntT
+	nI::IntT
+	nJ::IntT
+	nK::IntT
+	nG::IntT
 	TypeGrid::String
 	Order::Int = 2
 	Scheme::String
@@ -37,36 +37,36 @@ const γ = 5.0/3.0
 	UseConservative::Bool = true
 	UseGPU::Bool = false
 	verbose::Bool = false
-	iMin::typeInt
-	iMax::typeInt
-	jMin::typeInt
-	jMax::typeInt
-	kMin::typeInt
-	kMax::typeInt
-	iMinAll::typeInt
-	iMaxAll::typeInt
-	jMinAll::typeInt
-	jMaxAll::typeInt
-	kMinAll::typeInt
-	kMaxAll::typeInt
-	CFL::typeFloat
-	nStep::typeInt             # Total timesteps
-	tEnd::typeFloat
+	iMin::IntT
+	iMax::IntT
+	jMin::IntT
+	jMax::IntT
+	kMin::IntT
+	kMax::IntT
+	iMinAll::IntT
+	iMaxAll::IntT
+	jMinAll::IntT
+	jMaxAll::IntT
+	kMinAll::IntT
+	kMaxAll::IntT
+	CFL::RealT
+	nStep::IntT             # Total timesteps
+	tEnd::RealT
 	TypeBc::Vector{String} # Type of boundary conditions
 	IC::String
-	RiemannProblemType::typeInt
+	RiemannProblemType::IntT
 
-	nVar::typeInt
+	nVar::IntT
 
 	DoPlot::Bool = false
-	PlotInterval::typeInt = -1
+	PlotInterval::IntT = -1
 	PlotVar::String
-	x::typeRange
-	y::typeRange
-	z::typeRange
-	FullSize::Vector{typeInt}
-	GridSize::Vector{typeInt}
-	CellSize_D::Vector{typeFloat}
+	x::RangeT
+	y::RangeT
+	z::RangeT
+	FullSize::Vector{IntT}
+	GridSize::Vector{IntT}
+	CellSize_D::Vector{RealT}
 end
 
 """
@@ -86,7 +86,7 @@ function setParameters(filename)
 	nI = paramIn["Grid"]["nI"]::Int
 	nJ = paramIn["Grid"]["nJ"]::Int
 	nK = paramIn["Grid"]["nK"]::Int
-	xyzMinMax_D = hcat(paramIn["Grid"]["xyzMinMax"]...)::Array{Float64} 
+	xyzMinMax_D = hcat(paramIn["Grid"]["xyzMinMax"]...)::Array{Float64}
 
 	CoordMinMax_D = [0.0 0.0 0.0; 1.0 1.0 1.0]
 
