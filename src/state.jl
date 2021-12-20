@@ -1,7 +1,7 @@
 # State variables
 
 function set_init(param::Param)
-   @unpack  FullSize, nVar, nI, nJ, nK, nG = param
+   (;FullSize, nVar, nI, nJ, nK, nG) = param
 
    state_GV = zeros(FullSize[1],FullSize[2],FullSize[3], nVar)
 
@@ -156,8 +156,8 @@ end
 function update_state!(param::Param, state_GV, dt::AbstractFloat, faceFlux::FaceFlux,
    source_GV)
 
-   @unpack Flux_XV, Flux_YV, Flux_ZV = faceFlux
-   @unpack CellSize_D, iMin, iMax, jMin, jMax, kMin, kMax, nI, nJ, nK, nG, nVar = param
+   (;Flux_XV, Flux_YV, Flux_ZV) = faceFlux
+   (;CellSize_D, iMin, iMax, jMin, jMax, kMin, kMax, nI, nJ, nK, nG, nVar) = param
 
    if param.TypeGrid == "Cartesian"
       # No need for volume and face if the grid is uniform Cartesian
@@ -210,8 +210,8 @@ end
 
 "Local timestepping state update."
 function update_state!(param::Param, state_GV, dt, faceFlux::FaceFlux, source_GV)
-   @unpack Flux_XV, Flux_YV, Flux_ZV = faceFlux
-   @unpack CellSize_D, iMin, iMax, jMin, jMax, kMin, kMax, nI, nJ, nK, nG, nVar = param
+   (;Flux_XV, Flux_YV, Flux_ZV) = faceFlux
+   (;CellSize_D, iMin, iMax, jMin, jMax, kMin, kMax, nI, nJ, nK, nG, nVar) = param
 
    if param.TypeGrid == "Cartesian"
       # No need for volume and face if the grid is uniform Cartesian

@@ -1,8 +1,8 @@
 # Boundary conditions
 
 function set_cell_boundary!(param::Param, state_GV)
-   @unpack nG, nVar, TypeBc, iMin, iMax, jMin, jMax, kMin, kMax,
-      iMinAll, iMaxAll, jMinAll, jMaxAll, kMinAll, kMaxAll = param
+   (;nG, nVar, TypeBc, iMin, iMax, jMin, jMax, kMin, kMax,
+      iMinAll, iMaxAll, jMinAll, jMaxAll, kMinAll, kMaxAll) = param
 
    for (iBc,TypeBc) in enumerate(TypeBc)
       if TypeBc == "periodic"
