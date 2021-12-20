@@ -4,6 +4,7 @@ module Dante
 export solve, set_init_Riemann, EulerExact
 
 using Printf, TimerOutputs, Parameters
+using Meshes
 
 # Set main timer for global timing of functions
 const main_timer = TimerOutput()
@@ -33,11 +34,11 @@ function solve(paramFile="examples/PARAM_sods.toml")
 
 	reset_timer!(timer())
 
-	@timeit timer() "input" param = setParameters(paramFile)
+	@timeit timer() "input" param, state = setParameters(paramFile)
 
-	@timeit timer() "init" state_GV = set_init(param)
+	@timeit timer() "init" set_init!(param, state)
 
-	@timeit timer() "advance" advance!(param, state_GV)
+	@timeit timer() "advance" advance!(param, state)
 
 	# Compare with analytical solution, if possible
 	if param.DoPlot && param.IC == "Riemann"
@@ -49,7 +50,7 @@ function solve(paramFile="examples/PARAM_sods.toml")
 
 	# Check if running test
 	if occursin("test", paramFile)
-		return param, state_GV
+		return param, values(state).state_GV
 	end
 end
 

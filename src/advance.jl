@@ -1,7 +1,9 @@
 # I don't like the current implementation for timestepping!
 "Explicit time advance."
-function advance!(param, state_GV)
+function advance!(param::Param, state::MeshData)
 	@unpack verbose = param
+
+	state_GV = values(state).state_GV
 
 	faceState, faceGradient = init_face_value(param)
 

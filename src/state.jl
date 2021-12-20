@@ -1,14 +1,14 @@
 # State variables
 
-function set_init(param::Param)
-   @unpack  FullSize, nVar, nI, nJ, nK, nG = param
+function set_init!(param::Param, state::MeshData)
+   @unpack nI, nJ, nK, nG = param
 
-   state_GV = zeros(FullSize[1],FullSize[2],FullSize[3], nVar)
+   state_GV  = values(state).state_GV
 
-   density  = @view state_GV[:,:,:,Rho_]
-   velocity = @view state_GV[:,:,:,U_]
-   B        = @view state_GV[:,:,:,B_]
-   pressure = @view state_GV[:,:,:,P_]
+	density  = @view state_GV[:,:,:,Rho_]
+	velocity = @view state_GV[:,:,:,U_]
+	B        = @view state_GV[:,:,:,B_]
+	pressure = @view state_GV[:,:,:,P_]
 
    if param.IC == "contact discontinuity"
       density[1:floor(Int,nI/2),:,:] .= 2.0
@@ -49,7 +49,7 @@ function set_init(param::Param)
       error("unknown initial condition type!")
    end
 
-   return state_GV
+   return
 end
 
 """

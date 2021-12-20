@@ -170,4 +170,14 @@ function setParameters(filename)
 		iMin,iMax,jMin,jMax,kMin,kMax,iMinAll,iMaxAll,jMinAll, jMaxAll,kMinAll,kMaxAll,
 		CFL,nStep,tEnd,BCtype,IC,RiemannProblemType,nVar,DoPlot,
 		PlotInterval,PlotVar,x,y,z,FullSize,GridSize,CellSize_D)
+
+	state_GV = zeros(FullSize[1],FullSize[2],FullSize[3], nVar)
+
+	mesh = CartesianGrid((FullSize...,),(CoordMinMax_D[1,:]...,),(CellSize_D...,))
+
+	d = meshdata(mesh,
+		#vtable = (param = param), #WANRING: this is a hack!
+		etable = (state_GV = state_GV,)
+	)
+	return param, d
 end
