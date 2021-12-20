@@ -3,7 +3,7 @@ module Dante
 
 export solve, set_init_Riemann, EulerExact
 
-using Printf, TimerOutputs, Parameters
+using Printf, TimerOutputs
 
 # Set main timer for global timing of functions
 const main_timer = TimerOutput()

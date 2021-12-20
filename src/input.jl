@@ -23,7 +23,7 @@ const B_         = Bx_:Bz_
 const γ = 5.0/3.0
 
 "Model input parameters"
-@with_kw struct Param3D{IntT, RealT, RangeT<:AbstractArray} <: Param
+Base.@kwdef struct Param3D{IntT, RealT, RangeT<:AbstractArray} <: Param
 	nD::IntT
 	nI::IntT
 	nJ::IntT

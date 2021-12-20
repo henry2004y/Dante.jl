@@ -1,7 +1,7 @@
 # Source term
 
 function init_source(param::Param)
-   @unpack GridSize, FullSize, nVar = param
+   (;GridSize, FullSize, nVar) = param
 
    source_GV = Array{Float64,4}(undef, GridSize..., nVar)
    div_G = Array{Float64,3}(undef, GridSize...)
@@ -12,7 +12,7 @@ function init_source(param::Param)
 end
 
 function calc_source!(param::Param, state_GV, source_GV, U, div_G)
-   @unpack nI, nJ, nK, nG, iMin, iMax, jMin, jMax, kMin, kMax = param
+   (;nI, nJ, nK, nG, iMin, iMax, jMin, jMax, kMin, kMax) = param
 
    # Compute ∇⋅B using central difference
    @views divergence!(param, state_GV[:,:,:,B_], div_G)

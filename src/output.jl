@@ -8,7 +8,7 @@ using PyPlot
 "Plot 1D variables along a line."
 function plotvar(param::Param, it, state_GV)
    # Now this only works for 1D x!
-   @unpack iMin, iMax, jMin, jMax, kMin, kMax = param
+   (;iMin, iMax, jMin, jMax, kMin, kMax) = param
 
    plotvar = param.PlotVar
    nG = param.nG

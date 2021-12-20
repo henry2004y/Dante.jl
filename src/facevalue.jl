@@ -17,7 +17,7 @@ end
 
 function init_face_value(param::Param)
 
-   @unpack nI, nJ, nK, nVar = param
+   (;nI, nJ, nK, nVar) = param
 
    if param.Order == 2
       dq_X = Array{Float64,4}(undef,nI+2,nJ,nK,nVar)
@@ -72,7 +72,7 @@ function calc_face_value!(param::Param, state_GV,
    faceState::FaceState, faceGradient::FaceGradient)
 
    if param.Order == 1
-      @unpack iMin, iMax, jMin, jMax, kMin, kMax = param
+      (;iMin, iMax, jMin, jMax, kMin, kMax) = param
 
       faceState.LState_XV .= @view state_GV[iMin-1:iMax,jMin:jMax,kMin:kMax,:]
       faceState.RState_XV .= @view state_GV[iMin:iMax+1,jMin:jMax,kMin:kMax,:]
@@ -83,7 +83,7 @@ function calc_face_value!(param::Param, state_GV,
 
    elseif param.Order == 2
       # Compute and limit slopes
-      @unpack nI, nJ, nK, nG, nVar = param
+      (;nI, nJ, nK, nG, nVar) = param
 
       LState_XV, RState_XV = faceState.LState_XV, faceState.RState_XV
       LState_YV, RState_YV = faceState.LState_YV, faceState.RState_YV
