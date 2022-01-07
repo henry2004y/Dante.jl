@@ -1,15 +1,14 @@
 using Roots
 
 """
-	EulerExact(ρ1, u1, p1, ρ4, u4, p4, tEnd, n)
+	getEulerExactSol(ρ1, u1, p1, ρ4, u4, p4, tEnd, n)
 
-Classical Gas Exact Riemann Solver for shock tube problems
-This programs is based on the code of
-P. Wesseling. PRINCIPLES OF COMPUTATIONAL FLUID DYNAMICS Springer-Verlag, Berlin etc., 2001.
-ISBN 3-540-67853-0
-NOTE:
-A Cavitation Check is incorporated in the code. It further prevents plotting for
- possible but physically unlikely case of expansion shocks.
+Classical Gas Exact Riemann Solver for shock tube problems.
+This programs is based on the code of Principles Of Computational Fluid Dynamics by
+P. Wesseling.
+!!! note
+    A Cavitation Check is incorporated in the code. It further prevents plotting for
+    possible but physically unlikely case of expansion shocks.
 # Arguments
 - `ρ1::Float64`: left density at t=0.
 - `u1::Float64`: left velocity at t=0.
@@ -22,7 +21,7 @@ A Cavitation Check is incorporated in the code. It further prevents plotting for
 Coded by Manuel Diaz, IAM, NTU 03/09/2011.
 Migrated by Hongyang Zhou from MATLAB to Julia, 11/05/2019
 """
-function EulerExact(ρ1, u1, p1, ρ4, u4, p4, tEnd, n)
+function getEulerExactSol(ρ1, u1, p1, ρ4, u4, p4, tEnd, n)
 
    # Gamma values
    γ = (n+2)/n; α = (γ+1)/(γ-1)
@@ -103,7 +102,7 @@ function EulerExact(ρ1, u1, p1, ρ4, u4, p4, tEnd, n)
 end
 
 # Vector x version
-function EulerExact(ρ1, u1, p1, ρ4, u4, p4, tEnd, n, x)
+function getEulerExactSol(ρ1, u1, p1, ρ4, u4, p4, tEnd, n, x)
 
    # Gamma values
    γ=(n+2)/n; α=(γ+1)/(γ-1)

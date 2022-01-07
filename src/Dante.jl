@@ -1,7 +1,7 @@
 module Dante
 # Reimplementation of finite volume MHD in Julia.
 
-export solve, set_init_Riemann, EulerExact
+export solve, setInitRiemann, EulerExact
 
 using Printf, TimerOutputs
 

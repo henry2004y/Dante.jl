@@ -39,10 +39,10 @@ end
 "Plot the analytical solution of shock tube problem."
 function plot_Riemann_exact(param::Param)
    # Obtain the initial states
-   Rho, U, P, tEnd = set_init_Riemann(param.RiemannProblemType)
+   Rho, U, P, tEnd = setInitRiemann(param.RiemannProblemType)
    # Exact solution
    xe, re, ue, pe, ee, te, Me, se =
-      EulerExact(Rho[1], U[1], P[1], Rho[end], U[end], P[end], tEnd, 3)
+      getEulerExactSol(Rho[1], U[1], P[1], Rho[end], U[end], P[end], tEnd, 3)
 
    # Ee = @. pe/((γ-1)*re) + 0.5*ue^2
 

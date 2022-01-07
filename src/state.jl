@@ -33,7 +33,7 @@ function set_init(param::Param)
       velocity .*= density
       pressure .= 0.01
    elseif param.IC == "Riemann"
-      rho, u, p, tEnd, CFL = set_init_Riemann(param.RiemannProblemType)
+      rho, u, p, tEnd, CFL = setInitRiemann(param.RiemannProblemType)
       # Initial Condition for 1D domain
       # Density
       density[1:floor(Int,nI/2)+nG+1,:,:] .= rho[1] # region 1
@@ -53,12 +53,12 @@ function set_init(param::Param)
 end
 
 """
-	set_init_Riemann(RiemannProblemType, Verbose)
+	setInitRiemann(RiemannProblemType, Verbose)
 
 Set the initial conditions of Riemann problems. Note that currently tEnd and CFL number can
 only be set in PARAM.toml, and cannot be changed afterwards.
 """
-function set_init_Riemann(RiemannProblemType, Verbose=true)
+function setInitRiemann(RiemannProblemType, Verbose=true)
 
    if RiemannProblemType == 1
       Verbose && println("Case 1: Sods problem")
